@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hành Trình Đóa Hoa Bản Sắc 3D — Chúc Mừng 20/10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rose-gold: #f5cba7;
+      --gold-light: #ffefc1;
+      --pink-glow: #ff7597;
+      --deep-bg: #080312;
+      --card-bg: rgba(18, 8, 32, 0.68);
+      --border-lux: rgba(245, 203, 167, 0.35);
+    }
+
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+    body {
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 35%, #230c3d 0%, #0d041a 55%, #040108 100%);
+      font-family: 'Be Vietnam Pro', sans-serif;
+      color: #fff;
+      height: 100dvh;
+      width: 100vw;
+      position: relative;
+    }
+
+    canvas#bg-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+      pointer-events: auto;
+    }
+
+    /* Ánh sáng nền trang trí */
+    .ambient-orb {
+      position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; opacity: 0.45;
+      transition: background 1.2s ease;
+    }
+    #orb-1 { width: 380px; height: 380px; top: -80px; left: -80px; background: #9d174d; }
+    #orb-2 { width: 420px; height: 420px; bottom: -100px; right: -80px; background: #4c1d95; }
+
+    /* Các màn hình giao diện (Overlay UI) */
+    .screen {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; justify-content: space-between;
+      align-items: center; padding: 22px 16px; pointer-events: none;
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .screen.hidden {
+      opacity: 0; pointer-events: none !important; transform: translateY(15px) scale(0.98);
+      visibility: hidden;
+    }
+    .interactive-box { pointer-events: auto; }
+
+    /* Khung Kính Hoàng Gia (Luxury Botanical Glass Card) */
+    .glass-card {
+      background: linear-gradient(160deg, rgba(32, 14, 52, 0.78) 0%, rgba(14, 5, 26, 0.88) 100%);
+      border: 1px solid rgba(245, 203, 167, 0.32);
+      border-radius: 28px;
+      padding: 28px 24px;
+      width: 94%; max-width: 430px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.75),
+        0 0 40px rgba(255, 105, 160, 0.14),
+        inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass-card::before {
+      content: ""; position: absolute; inset: 6px;
+      border: 1px solid rgba(245, 203, 167, 0.12);
+      border-radius: 22px; pointer-events: none;
+    }
+
+    /* Màn hình 1: Nhập tên bắt đầu */
+    #intro-screen { justify-content: center; text-align: center; }
+    .intro-card {
+      margin-top: 130px; /* Chừa không gian cho Đóa Sen Pha Lê 3D phía trên */
+    }
+    .badge-lux {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 99px;
+      background: linear-gradient(90deg, rgba(245, 203, 167, 0.18), rgba(255, 117, 151, 0.25), rgba(245, 203, 167, 0.18));
+      border: 1px solid rgba(245, 203, 167, 0.45);
+      color: var(--gold-light);
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 14px;
+      box-shadow: 0 0 20px rgba(245, 203, 167, 0.2);
+    }
+    h1.main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 6vw, 31px);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #ffe3ec 45%, #f5cba7 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .ornament-divider {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin: 10px auto 14px; width: 70%;
+    }
+    .ornament-divider span {
+      height: 1px; flex: 1;
+      background: linear-gradient(90deg, transparent, rgba(245, 203, 167, 0.6), transparent);
+    }
+    .ornament-divider i {
+      color: var(--rose-gold); font-style: normal; font-size: 12px;
+    }
+    p.desc {
+      font-size: 13.5px; color: #e2d4f0; line-height: 1.65; margin-bottom: 22px; font-weight: 300;
+    }
+    .input-wrap {
+      position: relative; margin-bottom: 16px;
+    }
+    input#user-name {
+      width: 100%; padding: 15px 18px; border-radius: 16px;
+      border: 1px solid rgba(245, 203, 167, 0.4);
+      background: rgba(10, 3, 20, 0.65); color: #fff;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 15px; font-weight: 500; text-align: center; outline: none;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    input#user-name:focus {
+      border-color: #ff8fab;
+      box-shadow: 0 0 20px rgba(255, 143, 171, 0.35), inset 0 2px 10px rgba(0,0,0,0.5);
+      background: rgba(18, 6, 34, 0.8);
+    }
+    input#user-name::placeholder { color: rgba(226, 212, 240, 0.45); font-weight: 300; }
+
+    .btn-primary {
+      width: 100%; padding: 15px 22px; border-radius: 16px;
+      border: 1px solid rgba(255, 239, 193, 0.5);
+      background: linear-gradient(135deg, #ff6b9d 0%, #c93b7b 55%, #8e246d 100%);
+      color: #fff; font-family: 'Be Vietnam Pro', sans-serif;
+      font-weight: 600; font-size: 15px; letter-spacing: 0.5px; cursor: pointer;
+      box-shadow: 0 10px 28px rgba(217, 60, 130, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative; overflow: hidden;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(255, 107, 157, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      filter: brightness(1.08);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* Màn hình 2: Trắc nghiệm Phong cách Thẻ Tarot & Đóa Hoa 3D Nở Cánh */
+    #quiz-screen {
+      justify-content: space-between;
+      padding: 16px 14px 20px;
+    }
+
+    .quiz-top-stage {
+      width: 100%; max-width: 480px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; margin-top: 4px;
+      transition: opacity 0.32s ease, transform 0.32s ease;
+    }
+    .quiz-top-stage.switching {
+      opacity: 0; transform: translateY(-10px);
+    }
+
+    /* Dải 10 Tinh Tú / Nụ Hoa (Constellation Progress) */
+    .constellation-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 7px; margin-bottom: 10px;
+      padding: 6px 16px; border-radius: 99px;
+      background: rgba(14, 5, 28, 0.55);
+      border: 1px solid rgba(245, 203, 167, 0.25);
+      backdrop-filter: blur(8px);
+    }
+    .star-node {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(245, 203, 167, 0.4);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .star-node.done {
+      background: var(--rose-gold);
+      border-color: #fff;
+      box-shadow: 0 0 8px var(--rose-gold);
+    }
+    .star-node.active {
+      width: 13px; height: 13px;
+      background: #fff;
+      border-color: var(--gold-light);
+      box-shadow: 0 0 14px #ff7597, 0 0 24px var(--gold-light);
+      transform: scale(1.15);
+    }
+
+    .q-chapter {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-size: 14px; font-weight: 600;
+      color: var(--rose-gold); letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 4px;
+      text-shadow: 0 0 12px rgba(245, 203, 167, 0.4);
+    }
+    #q-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(17.5px, 4.6vw, 22px);
+      font-weight: 700; line-height: 1.38;
+      color: #ffffff; text-align: center;
+      max-width: 440px; padding: 0 8px;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 22px rgba(255, 117, 151, 0.45);
+    }
+
+    .bloom-status-pill {
+      font-size: 11px; color: rgba(255, 239, 193, 0.85);
+      background: rgba(16, 6, 32, 0.55);
+      border: 1px solid rgba(245, 203, 167, 0.28);
+      padding: 4px 14px; border-radius: 99px;
+      backdrop-filter: blur(6px);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    /* Lưới 2x2 Lá Bài Tarot Tương Tác ở nửa dưới màn hình */
+    .tarot-grid {
+      width: 100%; max-width: 460px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 11px;
+      perspective: 900px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .tarot-grid.switching {
+      opacity: 0; transform: translateY(16px) scale(0.96);
+    }
+
+    .tarot-option-card {
+      position: relative;
+      background: linear-gradient(155deg, rgba(34, 14, 58, 0.82) 0%, rgba(15, 5, 28, 0.92) 100%);
+      border: 1px solid rgba(245, 203, 167, 0.36);
+      border-radius: 18px;
+      padding: 13px 12px 12px;
+      color: #f8f0ff;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      text-align: center;
+      min-height: 118px;
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow:
+        0 10px 26px rgba(0, 0, 0, 0.55),
+        inset 0 0 18px rgba(245, 203, 167, 0.06);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    /* Viền đôi Tarot bên trong lá bài */
+    .tarot-option-card::before {
+      content: ""; position: absolute; inset: 4px;
+      border: 1px solid rgba(245, 203, 167, 0.14);
+      border-radius: 14px; pointer-events: none;
+    }
+    .tarot-option-card:hover {
+      transform: translateY(-5px) rotateX(4deg);
+      border-color: var(--gold-light);
+      background: linear-gradient(155deg, rgba(68, 22, 98, 0.9) 0%, rgba(28, 10, 48, 0.95) 100%);
+      box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.7),
+        0 0 24px rgba(255, 117, 151, 0.4),
+        inset 0 0 20px rgba(245, 203, 167, 0.18);
+    }
+    .tarot-option-card.selected-flip {
+      transform: scale(1.05) rotateY(18deg);
+      border-color: #fff;
+      background: linear-gradient(135deg, rgba(255, 117, 151, 0.65), rgba(245, 203, 167, 0.45));
+      box-shadow: 0 0 35px #ff7597, 0 0 60px var(--gold-light);
+    }
+
+    .tarot-roman {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      color: rgba(245, 203, 167, 0.7);
+      margin-bottom: 3px;
+    }
+    .tarot-icon-orb {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 203, 167, 0.22) 0%, rgba(255, 117, 151, 0.1) 65%, rgba(16, 5, 28, 0.85) 100%);
+      border: 1px solid rgba(245, 203, 167, 0.55);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+      box-shadow: 0 0 18px rgba(245, 203, 167, 0.25), inset 0 0 10px rgba(255, 239, 193, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .tarot-icon-orb::after {
+      content: ""; position: absolute; inset: -3px; border-radius: 50%;
+      border: 1px dashed rgba(245, 203, 167, 0.35);
+      pointer-events: none;
+    }
+    .tarot-icon-orb svg {
+      width: 23px; height: 23px;
+      stroke: #ffefc1;
+      fill: rgba(245, 203, 167, 0.18);
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 6px rgba(255, 210, 140, 0.7));
+    }
+    .tarot-option-card:hover .tarot-icon-orb {
+      transform: scale(1.14) translateY(-2px);
+      border-color: #fff;
+      box-shadow: 0 0 24px rgba(255, 117, 151, 0.55), inset 0 0 14px rgba(255, 239, 193, 0.4);
+    }
+    .tarot-opt-text {
+      font-size: 12.2px; font-weight: 400; line-height: 1.38;
+      color: #f5ecff;
+    }
+
+    /* Màn hình 3: Thẻ bài Kết quả 3D — gọn gàng không che mặt bài */
+    #result-screen {
+      padding: 10px 14px 12px;
+      justify-content: space-between;
+    }
+    #result-header {
+      text-align: center;
+      background: linear-gradient(180deg, rgba(16, 6, 30, 0.85) 0%, rgba(16, 6, 30, 0.35) 100%);
+      padding: 7px 22px 9px; border-radius: 20px;
+      border: 1px solid rgba(245, 203, 167, 0.28);
+      backdrop-filter: blur(8px);
+    }
+    .rarity-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #ffe599, #f5cba7, #ff9ebb);
+      color: #23062e; font-weight: 800; font-size: 10px; padding: 3px 13px;
+      border-radius: 99px; text-transform: uppercase; letter-spacing: 1.2px;
+      box-shadow: 0 0 16px rgba(245, 203, 167, 0.55);
+    }
+    #res-flower-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px, 5vw, 25px); font-weight: 800; margin: 4px 0 1px;
+      background: linear-gradient(to right, #ffffff, #ffe3ec, #f5cba7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+      text-shadow: 0 4px 20px rgba(255, 117, 151, 0.35);
+    }
+    #res-flower-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14.5px; color: var(--rose-gold); font-weight: 600; letter-spacing: 0.5px;
+    }
+
+    .card-hint-pill {
+      font-size: 10.5px; color: rgba(255, 239, 193, 0.82);
+      background: rgba(15, 5, 28, 0.65);
+      border: 1px solid rgba(245, 203, 167, 0.3);
+      padding: 3px 12px; border-radius: 99px;
+      margin-bottom: 4px; backdrop-filter: blur(6px);
+      letter-spacing: 0.4px;
+    }
+
+    #result-footer {
+      width: 95%; max-width: 450px; padding: 12px 18px;
+      border-radius: 22px;
+    }
+    #res-desc {
+      font-size: 12.2px; color: #ebdcf5; margin-bottom: 7px; line-height: 1.48; font-weight: 300;
+      text-align: center;
+    }
+    #res-wish {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15.5px; font-weight: 600; color: #fff9fb; font-style: italic; line-height: 1.42;
+      padding: 9px 14px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 143, 171, 0.16) 0%, rgba(245, 203, 167, 0.08) 100%);
+      border: 1px solid rgba(245, 203, 167, 0.35);
+      margin-bottom: 0; text-align: center;
+      box-shadow: inset 0 0 18px rgba(255, 117, 151, 0.12);
+    }
+
+    @media (max-height: 740px) {
+      .intro-card { margin-top: 90px; padding: 20px 18px; }
+      .tarot-option-card { min-height: 102px; padding: 10px 9px; }
+      .tarot-icon-orb { width: 36px; height: 36px; margin-bottom: 5px; }
+      .tarot-icon-orb svg { width: 19px; height: 19px; }
+      .tarot-opt-text { font-size: 11.5px; }
+      #result-footer { padding: 10px 14px; }
+      #res-desc { font-size: 11.5px; margin-bottom: 5px; }
+      #res-wish { font-size: 14px; padding: 7px 11px; margin-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-orb" id="orb-1"></div>
+  <div class="ambient-orb" id="orb-2"></div>
+
+  <!-- MÀN HÌNH 1: MỞ ĐẦU -->
+  <div id="intro-screen" class="screen">
+    <div></div>
+    <div class="glass-card interactive-box intro-card">
+      <span class="badge-lux">✦ Món Quà Nghệ Thuật 20/10 ✦</span>
+      <h1 class="main-title">Đóa Hoa Bản Sắc<br>Của Riêng Bạn</h1>
+      <div class="ornament-divider"><span></span><i>❖</i><span></span></div>
+      <p class="desc">Mỗi người phụ nữ là một tuyệt tác độc bản của thiên nhiên. Hãy chạm vào nụ hoa tâm thức và rút 10 lá bài cảm xúc để xem đóa hoa 3D nào sẽ bung nở dành riêng cho bạn.</p>
+      <div class="input-wrap">
+        <input type="text" id="user-name" placeholder="Nhập tên hoặc biệt danh của bạn..." maxlength="28" />
+      </div>
+      <button class="btn-primary" id="start-btn">Đánh Thức Mầm Hoa Ánh Sáng ✨</button>
+    </div>
+    <div style="font-size: 11px; color: rgba(245,203,167,0.5); letter-spacing: 1px;">CHẠM & XOAY KHÔNG GIAN 3D</div>
+  </div>
+
+  <!-- MÀN HÌNH 2: RÚT LÁ BÀI TAROT & NGẮM HOA 3D NỞ TỪNG CÁNH -->
+  <div id="quiz-screen" class="screen hidden">
+    <div class="quiz-top-stage" id="quiz-top-stage">
+      <div class="constellation-wrap" id="constellation-bar"></div>
+      <div class="q-chapter" id="progress-label">✦ Lá Bài Tâm Thức I / X ✦</div>
+      <div id="q-title">Câu hỏi...</div>
+    </div>
+
+    <!-- Khoảng không gian mở hoàn toàn ở giữa để Đóa Hoa 3D bung nở từng tầng cánh -->
+    <div style="flex: 1; display: flex; align-items: flex-end;">
+      <div class="bloom-status-pill" id="bloom-status-pill">🌱 Nụ hoa đang chờ năng lượng từ lựa chọn của bạn...</div>
+    </div>
+
+    <!-- Lưới 4 Lá Bài Tarot 2x2 -->
+    <div class="tarot-grid interactive-box" id="q-options"></div>
+  </div>
+
+  <!-- MÀN HÌNH 3: KẾT QUẢ THẺ BÀI HOA 3D HOLOGRAM -->
+  <div id="result-screen" class="screen hidden">
+    <div id="result-header" class="interactive-box">
+      <span class="rarity-badge" id="res-rarity">Độ hiếm: 15%</span>
+      <h2 id="res-flower-name">HOA HƯỚNG DƯƠNG</h2>
+      <div id="res-flower-title">Khí chất: Mặt Trời Ấm Áp</div>
+    </div>
+
+    <!-- Khoảng trống ở giữa dành cho Thẻ Bài 3D xoay cảm ứng -->
+    <div style="flex:1; display:flex; align-items:flex-end;">
+      <div class="card-hint-pill">✨ Vuốt nhẹ để nghiêng thẻ bài Hologram 3D ✨</div>
+    </div>
+
+    <div id="result-footer" class="glass-card interactive-box">
+      <div id="res-desc">Mô tả tính cách...</div>
+      <div id="res-wish">Lời chúc 20/10...</div>
+    </div>
+  </div>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // =========================================================================
+    // 1. CƠ SỞ DỮ LIỆU 18 LOÀI HOA (KÈM MÃ MÀU & CẤU TRÚC VẼ RIÊNG BIỆT)
+    // =========================================================================
+    const FLOWERS_DB = {
+      "E-F-M-S": {
+        id: "sunflower", name: "Hoa Hướng Dương", latin: "Helianthus Annuus", title: "Mặt Trời Ấm Áp", rarity: "✦ Độ hiếm: 8.5%",
+        desc: "Bạn rạng rỡ, lạc quan và chân thành. Năng lượng tích cực của bạn luôn sưởi ấm và tiếp thêm sức mạnh cho mọi người xung quanh.",
+        wish: "Chúc {name} ngày 20/10 luôn rạng rỡ như đóa Hướng Dương, giữ trọn nụ cười tỏa nắng và đón nhận vạn điều ngọt ngào!",
+        palette: { glow: "#ffaa00", primary: "#ffd000", secondary: "#ff7b00", deep: "#993d00", core: "#2b1204", accent: "#fff3b0" }
+      },
+      "E-F-M-B": {
+        id: "sakura", name: "Hoa Anh Đào", latin: "Prunus Serrulata", title: "Thanh Xuân Rực Rỡ", rarity: "✦ Độ hiếm: 7.2%",
+        desc: "Nhiệt huyết, phóng khoáng và cuốn hút. Bạn sống trọn vẹn từng khoảnh khắc và khiến ai gặp một lần cũng nhớ mãi.",
+        wish: "Chúc {name} một ngày 20/10 tươi đẹp như mùa hoa Anh Đào nở rộ, luôn tự do, rạng ngời và ngập tràn hạnh phúc!",
+        palette: { glow: "#ff8fab", primary: "#ffe5ec", secondary: "#ffb3c6", deep: "#c9184a", core: "#a4133c", accent: "#ffffff" }
+      },
+      "E-F-C-S": {
+        id: "hydrangea", name: "Hoa Cẩm Tú Cầu", latin: "Hydrangea Macrophylla", title: "Kẻ Mộng Mơ Tinh Tế", rarity: "✦ Độ hiếm: 6.4%",
+        desc: "Giàu cảm xúc, chu đáo và biết lắng nghe. Bạn trân trọng những kỷ niệm nhỏ bé và có tâm hồn nghệ thuật vô cùng phong phú.",
+        wish: "Chúc {name} ngày 20/10 đong đầy những bất ngờ lãng mạn, mong bạn luôn được bao bọc bởi sự dịu dàng và yêu thương!",
+        palette: { glow: "#72efdd", primary: "#e0fbfc", secondary: "#90e0ef", deep: "#5e60ce", core: "#fff8d6", accent: "#caf0f8" }
+      },
+      "E-F-C-B": {
+        id: "peony", name: "Hoa Mẫu Đơn", latin: "Paeonia Suffruticosa", title: "Vẻ Đẹp Phú Quý", rarity: "✦ Độ hiếm: 5.0%",
+        desc: "Nồng nhiệt, sang trọng và đầy sức sống. Bạn vừa có trái tim ấm áp, vừa toát lên cốt cách kiêu kỳ khiến người khác ngưỡng mộ.",
+        wish: "Chúc {name} ngày 20/10 kiêu sa và viên mãn như đóa Mẫu Đơn, luôn gặp may mắn, thịnh vượng và ngập tràn tình yêu!",
+        palette: { glow: "#ff4d6d", primary: "#fff0f3", secondary: "#ff758f", deep: "#800f2f", core: "#ffd166", accent: "#ffccd5" }
+      },
+      "E-T-M-S": {
+        id: "tulip", name: "Hoa Tulip Hoàng Gia", latin: "Tulipa Gesneriana", title: "Nàng Thơ Hiện Đại", rarity: "✦ Độ hiếm: 9.0%",
+        desc: "Thông minh, thanh lịch và năng động. Bạn biết cách cân bằng hoàn hảo giữa công việc hiệu quả và việc tận hưởng cuộc sống.",
+        wish: "Chúc mừng 20/10 tới {name}! Mong bạn luôn giữ vững phong thái tự tin, thanh lịch và mỗi ngày đều là một hành trình thú vị.",
+        palette: { glow: "#ff758f", primary: "#fff5f7", secondary: "#ff85a1", deep: "#b5179e", core: "#ffd166", accent: "#ffe5ec" }
+      },
+      "E-T-M-B": {
+        id: "rose", name: "Hoa Hồng Nhung", latin: "Rosa Damascena", title: "Nữ Hoàng Bản Lĩnh", rarity: "✦ Độ hiếm: 6.8%",
+        desc: "Quyết đoán, độc lập và quyến rũ. Bạn biết rõ giá trị bản thân, dám theo đuổi mục tiêu và luôn làm chủ cuộc sống của mình.",
+        wish: "Gửi {name} — đóa Hồng bản lĩnh và kiêu hãnh! Chúc bạn ngày 20/10 tỏa sáng rực rỡ và chinh phục mọi đỉnh cao phía trước.",
+        palette: { glow: "#ff0a54", primary: "#ffccd5", secondary: "#e01e37", deep: "#470515", core: "#ff758f", accent: "#ff8fab" }
+      },
+      "E-T-C-S": {
+        id: "daisy", name: "Hoa Cúc Họa Mi", latin: "Bellis Perennis", title: "Nắng Thu Trong Trẻo", rarity: "✦ Độ hiếm: 7.5%",
+        desc: "Gần gũi, tinh khôi nhưng vô cùng ấm áp. Bạn mang lại cảm giác tin cậy, giản dị mà cuốn hút theo cách rất riêng.",
+        wish: "Chúc {name} một ngày 20/10 trong trẻo và bình yên như Cúc Họa Mi, luôn vui vẻ, yêu đời và gặp nhiều điều may mắn!",
+        palette: { glow: "#ffd166", primary: "#ffffff", secondary: "#e9f5f9", deep: "#94a8b3", core: "#f77f00", accent: "#fcbf49" }
+      },
+      "E-T-C-B": {
+        id: "orchid", name: "Hoa Lan Hồ Điệp", latin: "Phalaenopsis", title: "Quý Cô Hoàn Mỹ", rarity: "✦ Độ hiếm: 5.4%",
+        desc: "Sắc sảo, chỉn chu và có gu thẩm mỹ cao. Bạn luôn hướng tới sự hoàn thiện và là hình mẫu lý tưởng trong mắt mọi người.",
+        wish: "Chúc {name} ngày 20/10 sang trọng và rạng ngời như nhành Lan Hồ Điệp, luôn thành công và giữ vững khí chất đỉnh cao!",
+        palette: { glow: "#d946ef", primary: "#fae8ff", secondary: "#c026d3", deep: "#4a044e", core: "#fbbf24", accent: "#f5d0fe" }
+      },
+      "I-F-M-S": {
+        id: "dandelion", name: "Hoa Bồ Công Anh", latin: "Taraxacum Officinale", title: "Cơn Gió Tự Do", rarity: "✦ Độ hiếm: 6.1%",
+        desc: "Nhẹ nhàng, bay bổng và yêu sự tự do. Bạn không thích sự gò bó, luôn nhìn cuộc đời bằng đôi mắt trong sáng và vị tha.",
+        wish: "Chúc {name} ngày 20/10 tự do bay nhảy theo những ước mơ của mình, đi đến đâu cũng gieo mầm niềm vui và hy vọng!",
+        palette: { glow: "#a2d2ff", primary: "#ffffff", secondary: "#bde0fe", deep: "#7209b7", core: "#ffe599", accent: "#ffafcc" }
+      },
+      "I-F-M-B": {
+        id: "iris", name: "Hoa Diên Vỹ", latin: "Iris Germanica", title: "Sắc Tím Bí Ẩn", rarity: "✦ Độ hiếm: 4.8%",
+        desc: "Sáng tạo, cá tính và có trực giác nhạy bén. Bạn ít nói nhưng sở hữu chiều sâu tư duy và sức hút khó cưỡng.",
+        wish: "Chúc {name} một ngày 20/10 thật đặc biệt và đầy cảm hứng! Mong bạn luôn tự hào về nét cá tính độc bản của chính mình.",
+        palette: { glow: "#9d4edd", primary: "#f3e8ff", secondary: "#7b2cbf", deep: "#240046", core: "#ffb703", accent: "#e0aaff" }
+      },
+      "I-F-C-S": {
+        id: "lily_valley", name: "Hoa Linh Lan", latin: "Convallaria Majalis", title: "Thanh Âm Chữa Lành", rarity: "✦ Độ hiếm: 4.5%",
+        desc: "Thuần khiết, dịu dàng và sâu sắc. Sự hiện diện của bạn giống như một liều thuốc bình yên xoa dịu mọi mệt mỏi xung quanh.",
+        wish: "Chúc {name} ngày 20/10 ngọt ngào như tiếng chuông hoa Linh Lan, mong mọi sự dịu dàng bạn trao đi sẽ quay về ôm lấy bạn!",
+        palette: { glow: "#95d5b2", primary: "#ffffff", secondary: "#d8f3dc", deep: "#2d6a4f", core: "#fefae0", accent: "#b7e4c7" }
+      },
+      "I-F-C-B": {
+        id: "wisteria", name: "Hoa Tử Đằng", latin: "Wisteria Sinensis", title: "Chiều Sâu Lãng Mạn", rarity: "✦ Độ hiếm: 4.2%",
+        desc: "Thủy chung, sâu lắng và đầy chất thơ. Bạn sống nội tâm, trọng tình nghĩa và có sức quyến rũ mê hoặc lòng người.",
+        wish: "Chúc {name} ngày 20/10 ngập tràn những khoảnh khắc lãng mạn và bình yên bên những người bạn yêu thương nhất!",
+        palette: { glow: "#c77dff", primary: "#f8edeb", secondary: "#b56576", deep: "#3c096c", core: "#ffe5ec", accent: "#e0aaff" }
+      },
+      "I-T-M-S": {
+        id: "lavender", name: "Hoa Oải Hương", latin: "Lavandula Angustifolia", title: "Hương Thơm Điềm Đạm", rarity: "✦ Độ hiếm: 5.8%",
+        desc: "Tinh tế, độc lập và điềm tĩnh. Bạn không thích ồn ào mà chinh phục mọi thứ bằng sự kiên nhẫn và trí tuệ nhẹ nhàng.",
+        wish: "Chúc {name} một ngày 20/10 thư thái và an nhiên như hương Oải Hương, luôn giữ được sự cân bằng và bình yên trong tâm hồn!",
+        palette: { glow: "#b5179e", primary: "#f3e8ff", secondary: "#9d4edd", deep: "#3c096c", core: "#e0aaff", accent: "#d8b4fe" }
+      },
+      "I-T-M-B": {
+        id: "lily", name: "Hoa Bách Hợp", latin: "Lilium Candidum", title: "Khí Chất Thanh Cao", rarity: "✦ Độ hiếm: 5.5%",
+        desc: "Độc lập, thẳng thắn và kiêu hãnh. Bạn có nguyên tắc sống rõ ràng, bản lĩnh vững vàng và không dễ bị lung lay.",
+        wish: "Chúc {name} ngày 20/10 luôn kiêu hãnh, rạng ngời và tự tin vững bước trên con đường mà bạn đã lựa chọn!",
+        palette: { glow: "#ff8fab", primary: "#ffffff", secondary: "#ffccd5", deep: "#c9184a", core: "#d97706", accent: "#ffe5ec" }
+      },
+      "I-T-C-S": {
+        id: "lotus", name: "Hoa Sen Tinh Khiết", latin: "Nelumbo Nucifera", title: "Tâm Hồn An Nhiên", rarity: "✦ Độ hiếm: 5.3%",
+        desc: "Trong sáng, trí tuệ và kiên cường. Dù ở trong hoàn cảnh nào, bạn vẫn giữ được sự tĩnh tại và phẩm chất tốt đẹp.",
+        wish: "Chúc {name} ngày 20/10 thật trọn vẹn và an nhiên! Mong bạn luôn mềm mại nhưng kiên cường, tỏa hương thanh khiết giữa đời.",
+        palette: { glow: "#ff85a1", primary: "#fff8fa", secondary: "#ff8fab", deep: "#b5179e", core: "#f59e0b", accent: "#fde68a" }
+      },
+      "I-T-C-B": {
+        id: "camellia", name: "Hoa Trà My", latin: "Camellia Japonica", title: "Đóa Hoa Kiên Cường", rarity: "✦ Độ hiếm: 4.5%",
+        desc: "Kín đáo, cầu toàn và có nội lực mạnh mẽ. Như hoa trà nở giữa mùa đông, bạn càng qua thử thách càng tỏa sáng rực rỡ.",
+        wish: "Chúc {name} ngày 20/10 luôn vững vàng, xinh đẹp và kiêu hãnh như đóa Trà My, gặt hái thật nhiều quả ngọt xứng đáng!",
+        palette: { glow: "#fb6f92", primary: "#fff0f3", secondary: "#ff4d6d", deep: "#690b22", core: "#ffd166", accent: "#ffccd5" }
+      },
+      "SSR-1": {
+        id: "magnolia", name: "Hoa Mộc Lan (SSR)", latin: "Magnolia Liliiflora", title: "Tuyệt Sắc Cân Bằng", rarity: "🔥 Cực Hiếm SSR • 2.5%",
+        desc: "Sự giao thoa hoàn hảo giữa mạnh mẽ và dịu dàng, giữa lý trí và cảm xúc. Bạn có khả năng thích nghi tuyệt vời và khí chất cao quý.",
+        wish: "Chúc mừng {name} đã mở khóa loài hoa SSR! Chúc bạn ngày 20/10 viên mãn, trọn vẹn cả niềm vui, sự nghiệp lẫn tình yêu.",
+        palette: { glow: "#f5cba7", primary: "#ffffff", secondary: "#f3c4fb", deep: "#7209b7", core: "#ffe66d", accent: "#ffefc1" }
+      },
+      "SSR-2": {
+        id: "queen_night", name: "Hoa Quỳnh Đêm (SSR)", latin: "Epiphyllum Oxypetalum", title: "Nữ Hoàng Huyền Bí", rarity: "💎 Huyền Thoại SSR • 1.0%",
+        desc: "Độc bản, sâu sắc và hiếm có. Bạn chỉ mở lòng với những người thực sự thấu hiểu mình, mang vẻ đẹp thuần khiết và đầy mê hoặc.",
+        wish: "{name} chính là đóa Quỳnh Đêm quý giá nhất! Chúc bạn ngày 20/10 luôn tỏa sáng theo cách độc nhất vô nhị của riêng mình.",
+        palette: { glow: "#90e0ef", primary: "#ffffff", secondary: "#caf0f8", deep: "#3a0ca3", core: "#ffd166", accent: "#e0fbfc" }
+      }
+    };
+
+    // =========================================================================
+    // 2. BỘ ICON VECTOR VÀNG KIM NGHỆ THUẬT CHO LÁ BÀI TAROT (THAY THẾ EMOJI)
+    // =========================================================================
+    const TAROT_SVG_ICONS = {
+      sunrise: `<svg viewBox="0 0 24 24"><path d="M12 3v3m-6.36.64l2.12 2.12M3 15h18M5 19h14M17.66 6.64l-2.12 2.12"/><path d="M7 15a5 5 0 0 1 10 0"/><circle cx="12" cy="15" r="2"/></svg>`,
+      sun: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/></svg>`,
+      sunset: `<svg viewBox="0 0 24 24"><path d="M3 16h18M5 20h14"/><path d="M16.5 16a4.5 4.5 0 1 0-9 0"/><path d="M12 4l1.5 3 3 .5-2.2 2.1.5 3-2.8-1.5-2.8 1.5.5-3-2.2-2.1 3-.5z"/></svg>`,
+      moon: `<svg viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/><path d="M16 4l.8 1.8L18.5 6.5l-1.7.8L16 9l-.8-1.7-1.7-.8 1.7-.7z"/></svg>`,
+      breeze: `<svg viewBox="0 0 24 24"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/><circle cx="18" cy="6" r="1"/></svg>`,
+      rain: `<svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 7v8m-3-3a3 3 0 0 0 6 0"/></svg>`,
+      stars: `<svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/><circle cx="19" cy="5" r="1.2"/><circle cx="5" cy="19" r="1.2"/></svg>`,
+      crystal: `<svg viewBox="0 0 24 24"><polygon points="12 2 19 8 16 22 8 22 5 8 12 2"/><path d="M5 8h14M12 2l-2 6 2 14 2-14-2-6z"/></svg>`,
+      note: `<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+      harp: `<svg viewBox="0 0 24 24"><path d="M6 3v18c6 0 12-4 12-11 0-4-3-7-6-7-2.5 0-4 1.5-6 0z"/><path d="M9 5v15m3-14v12m3-10v8"/></svg>`,
+      guitar: `<svg viewBox="0 0 24 24"><path d="M12 3C7 3 4 7 4 12c0 4 3 8 8 9 5-1 8-5 8-9 0-5-3-9-8-9z"/><path d="M12 3v18m-4-9c2.5-2 5.5-2 8 0"/></svg>`,
+      sax: `<svg viewBox="0 0 24 24"><path d="M12 2l1.8 4.2L18 8l-4.2 1.8L12 14l-1.8-4.2L6 8l4.2-1.8z"/><path d="M5 16l1.2 2.8L9 20l-2.8 1.2L5 24l-1.2-2.8L1 20l2.8-1.2z"/><path d="M19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg>`,
+      joy: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2.5 4 2.5 4-2.5 4-2.5"/><path d="M9 9.5h.01M15 9.5h.01M12 2v2m0 16v2"/></svg>`,
+      heart: `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+      compass: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
+      orb: `<svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="7"/><path d="M7 20h10M9 17h6"/><path d="M10 7a3 3 0 0 1 4 0"/></svg>`,
+      scroll: `<svg viewBox="0 0 24 24"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h7M8 13h7M8 17h4"/></svg>`,
+      dove: `<svg viewBox="0 0 24 24"><path d="M12 21c-4.5-2-8-6-8-10.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 8 2.5c0 4.5-3.5 8.5-8 10.5z"/><circle cx="12" cy="12" r="2"/></svg>`,
+      lamp: `<svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
+      sprout: `<svg viewBox="0 0 24 24"><path d="M12 22V10"/><path d="M12 14c-4.5 0-7-2.5-7-7 4.5 0 7 2.5 7 7z"/><path d="M12 11c4.5 0 7-2.5 7-7-4.5 0-7 2.5-7 7z"/></svg>`,
+      mirror: `<svg viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="6" ry="7"/><path d="M12 17v5m-3 0h6"/><path d="M10 7l4 4"/></svg>`,
+      chalice: `<svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M12 14v6m-4 0h8M5 4h14"/></svg>`,
+      palette: `<svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8h6.1l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8-4.9-3.6h6.1z"/></svg>`,
+      lotus: `<svg viewBox="0 0 24 24"><path d="M12 4c2.5 3.5 3.5 7.5 0 13-3.5-5.5-2.5-9.5 0-13z"/><path d="M12 17c4-1 7.5-4.5 8-9-3.5 0-6.5 2-8 9z"/><path d="M12 17c-4-1-7.5-4.5-8-9 3.5 0 6.5 2 8 9z"/><path d="M5 20h14"/></svg>`,
+      crown: `<svg viewBox="0 0 24 24"><polygon points="2 18 5 7 9.5 12 12 5 14.5 12 19 7 22 18 2 18"/><path d="M4 21h16"/></svg>`,
+      hourglass: `<svg viewBox="0 0 24 24"><path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/></svg>`,
+      wings: `<svg viewBox="0 0 24 24"><path d="M12 14c-3-6-9-8-9-8 0 6 3 10 9 12 6-2 9-6 9-12 0 0-6 2-9 8z"/><path d="M12 6v14"/></svg>`,
+      flame: `<svg viewBox="0 0 24 24"><path d="M12 2c1.5 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-5.5 3-8 1 2 2 2.5 2 5 1-2.5 1.5-5 0-8z"/></svg>`,
+      key: `<svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4m-2 2l2 2m-4 0l2 2"/></svg>`,
+      clover: `<svg viewBox="0 0 24 24"><path d="M12 12c-3-4.5-7-2-5 2s5 2 5-2zm0 0c3-4.5 7-2 5 2s-5 2-5-2zm0 0c-4.5-3-2-7 2-5s2 5-2 5zm0 0c-4.5 3-2 7 2 5s2-5-2-5z"/><path d="M12 12v9"/></svg>`
+    };
+
+    // =========================================================================
+    // 3. BỘ 10 CÂU HỎI TÂM THỨC & ĐIỂM SỐ 4 TRỤC (E/I, F/T, M/C, S/B)
+    // =========================================================================
+    const QUESTIONS = [
+      {
+        q: "1. Khoảnh khắc nào trong ngày khiến tâm hồn bạn dễ chịu nhất?",
+        envColor: 0xffaa66,
+        opts: [
+          { icon: "sunrise", text: "Bình minh vừa lên, nắng sớm trong veo và đầy hy vọng", traits: { E: 2, M: 1 } },
+          { icon: "sun",     text: "Buổi trưa nắng vàng rực rỡ, bầu trời cao và xanh ngắt", traits: { E: 2, F: -1 } },
+          { icon: "sunset",  text: "Hoàng hôn tím cam lãng đãng khi phố xá bắt đầu lên đèn", traits: { F: 2, S: 1 } },
+          { icon: "moon",    text: "Đêm khuya tĩnh mịch, chỉ có ánh trăng và tiếng gió", traits: { E: -2, M: -1 } }
+        ]
+      },
+      {
+        q: "2. Nếu bước vào một khu vườn kỳ ảo, bạn muốn thời tiết ở đó như thế nào?",
+        envColor: 0x66ccff,
+        opts: [
+          { icon: "breeze",  text: "Gió mát rượi thổi những cánh hoa bay lượn khắp bầu trời", traits: { M: 2, E: 1 } },
+          { icon: "rain",    text: "Một cơn mưa phùn nhẹ nhàng kèm lớp sương mờ ảo", traits: { E: -1, F: 2 } },
+          { icon: "stars",   text: "Bầu trời đêm quang đãng với hàng ngàn đom đóm phát sáng", traits: { M: -2, S: 1 } },
+          { icon: "crystal", text: "Nắng ấm áp xuyên qua kẽ lá, lấp lánh như pha lê", traits: { E: 1, F: -2 } }
+        ]
+      },
+      {
+        q: "3. Giai điệu nào miêu tả đúng nhất nhịp sống hiện tại của bạn?",
+        envColor: 0xff77aa,
+        opts: [
+          { icon: "note",   text: "Một bản Pop/Indie bắt tai, nhịp điệu nhanh và đầy hứng khởi", traits: { E: 2, M: 2 } },
+          { icon: "harp",   text: "Tiếng đàn Piano hoặc Violin cổ điển, sang trọng và sâu lắng", traits: { F: -2, M: -2 } },
+          { icon: "guitar", text: "Nhạc Acoustic hoặc Lo-fi mộc mạc, nghe êm tai và thư giãn", traits: { S: 2, E: -1 } },
+          { icon: "sax",    text: "Bản nhạc Jazz hoặc R&B ngẫu hứng, quyến rũ và khác biệt", traits: { S: -2, M: 1 } }
+        ]
+      },
+      {
+        q: "4. Trong một nhóm bạn, mọi người thường nhớ đến bạn là người...",
+        envColor: 0x88ffaa,
+        opts: [
+          { icon: "joy",     text: "Luôn tạo tiếng cười, khuấy động bầu không khí chung", traits: { E: 2, S: 1 } },
+          { icon: "heart",   text: "Người lắng nghe tâm sự, dịu dàng và thấu hiểu cảm xúc", traits: { F: 2, S: 2 } },
+          { icon: "compass", text: "Người đưa ra quyết định sắc sảo, thẳng thắn và đáng tin cậy", traits: { F: -2, S: -2 } },
+          { icon: "orb",     text: "Có thế giới riêng độc lập, ít nói nhưng câu nào cũng chất", traits: { E: -2, S: -1 } }
+        ]
+      },
+      {
+        q: "5. Khi gặp một thử thách bất ngờ, phản ứng đầu tiên của bạn là?",
+        envColor: 0xffcc44,
+        opts: [
+          { icon: "scroll", text: "Bình tĩnh phân tích nguyên nhân, lập kế hoạch giải quyết", traits: { F: -2, M: -1 } },
+          { icon: "dove",   text: "Tìm người tin tưởng để chia sẻ, giải tỏa cảm xúc trước", traits: { F: 2, E: 1 } },
+          { icon: "lamp",   text: "Thử ngay một cách làm mới mẻ, sáng tạo chưa ai nghĩ tới", traits: { M: 2, S: -1 } },
+          { icon: "sprout", text: "Lặng lẽ tự mình vượt qua với sự kiên trì đáng kinh ngạc", traits: { E: -2, M: -2 } }
+        ]
+      },
+      {
+        q: "6. Vào một ngày cuối tuần hoàn toàn rảnh rỗi, bạn sẽ chọn làm gì?",
+        envColor: 0xff6699,
+        opts: [
+          { icon: "mirror",  text: "Lên đồ thật xinh đi cà phê chụp ảnh, dạo phố cùng bạn bè", traits: { E: 2, M: 1 } },
+          { icon: "chalice", text: "Ở nhà đọc sách, xem phim, chăm cây hoặc nấu món ngon", traits: { E: -2, S: 2 } },
+          { icon: "palette", text: "Tham gia workshop nghệ thuật, cắm hoa, làm gốm", traits: { F: 2, M: -1 } },
+          { icon: "lotus",   text: "Dành thời gian học kỹ năng mới hoặc đi spa, tập luyện", traits: { F: -2, S: -1 } }
+        ]
+      },
+      {
+        q: "7. Phong cách thời trang hoặc vẻ đẹp nào thu hút bạn nhất?",
+        envColor: 0xbb88ff,
+        opts: [
+          { icon: "stars",     text: "Thanh lịch, tối giản, hiện đại và năng động (Minimalism)", traits: { M: 2, F: -1 } },
+          { icon: "sprout",    text: "Nhẹ nhàng, nữ tính, bay bổng như nàng thơ (Pastel Muse)", traits: { S: 2, F: 1 } },
+          { icon: "crown",     text: "Quyến rũ, sắc sảo, sang trọng và nổi bật (Glamour Chic)", traits: { S: -2, E: 1 } },
+          { icon: "hourglass", text: "Cổ điển, tinh tế, kín đáo nhưng đầy khí chất (Vintage)", traits: { M: -2, E: -1 } }
+        ]
+      },
+      {
+        q: "8. Trong tình cảm và các mối quan hệ, điều bạn trân trọng nhất là?",
+        envColor: 0xff88cc,
+        opts: [
+          { icon: "heart",   text: "Sự đồng điệu tâm hồn, những cử chỉ quan tâm nhỏ tinh tế", traits: { F: 2, S: 2 } },
+          { icon: "wings",   text: "Sự tôn trọng không gian riêng, cùng nhau tiến bộ", traits: { F: -2, M: 2 } },
+          { icon: "flame",   text: "Sự nồng nhiệt, lãng mạn và luôn làm mới cảm xúc", traits: { E: 1, S: -2 } },
+          { icon: "key",     text: "Sự thủy chung, bình yên và cảm giác an toàn tuyệt đối", traits: { E: -1, M: -2 } }
+        ]
+      },
+      {
+        q: "9. Nếu có một món quà phép thuật ngày 20/10, bạn sẽ chọn gì?",
+        envColor: 0x55ddff,
+        opts: [
+          { icon: "crown",  text: "Chiếc vương miện pha lê giúp bạn luôn tỏa sáng rực rỡ", traits: { S: -2, F: -1 } },
+          { icon: "wings",  text: "Đôi cánh ánh sáng giúp bạn tự do bay đến mọi chân trời", traits: { M: 2, E: 1 } },
+          { icon: "harp",   text: "Hộp nhạc cổ điển xoa dịu nỗi buồn và lưu giữ kỷ niệm", traits: { F: 2, M: -2 } },
+          { icon: "clover", text: "Viên ngọc lục bảo mang lại bình an, may mắn và sức sống", traits: { S: 2, E: -1 } }
+        ]
+      },
+      {
+        q: "10. Lời chúc nào dưới đây chạm đúng mong ước của bạn nhất lúc này?",
+        envColor: 0xffdd77,
+        opts: [
+          { icon: "sun",     text: "'Luôn rực rỡ như ánh mặt trời và ngập tràn niềm vui'", traits: { E: 1, M: 1 } },
+          { icon: "crystal", text: "'Luôn bản lĩnh, độc lập, kiêu hãnh trên mọi đỉnh cao'", traits: { F: -1, S: -1 } },
+          { icon: "heart",   text: "'Luôn giữ trái tim ấm áp, dịu dàng và được yêu thương'", traits: { F: 1, S: 1 } },
+          { icon: "lotus",   text: "'Luôn an nhiên, tự tại, giữ vững bình yên trước sóng gió'", traits: { E: -1, M: -1 } }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 4. ENGINE VẼ TRANH BOTANICAL 18 LOÀI HOA RỰC RỠ & ĐẦY ĐẶN (1024x1024)
+    // =========================================================================
+    const textureCache = {};
+    const cardBackdropCache = {};
+
+    function drawBotanicalLeaf(ctx, x, y, angle, len, wid, cLight = "#74c69d", cDark = "#1b4332") {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      const grad = ctx.createLinearGradient(0, 0, 0, -len);
+      grad.addColorStop(0, cDark);
+      grad.addColorStop(0.5, "#2d6a4f");
+      grad.addColorStop(1, cLight);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-wid, -len * 0.3, -wid * 0.85, -len * 0.78, 0, -len);
+      ctx.bezierCurveTo(wid * 0.85, -len * 0.78, wid, -len * 0.3, 0, 0);
+      ctx.fillStyle = grad;
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowBlur = 16;
+      ctx.fill();
+
+      ctx.strokeStyle = "#f5cba7";
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, -4);
+      ctx.quadraticCurveTo(wid * 0.08, -len * 0.5, 0, -len * 0.92);
+      ctx.strokeStyle = "rgba(255, 239, 193, 0.65)";
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      for (let i = 1; i <= 4; i++) {
+        const vy = -len * (i * 0.18);
+        const vw = wid * (1 - Math.abs(i * 0.18 - 0.45)) * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(0, vy);
+        ctx.quadraticCurveTo(-vw * 0.5, vy - 8, -vw, vy - 18);
+        ctx.moveTo(0, vy);
+        ctx.quadraticCurveTo(vw * 0.5, vy - 8, vw, vy - 18);
+        ctx.strokeStyle = "rgba(255, 239, 193, 0.35)";
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawStem(ctx, x0, y0, cx1, cy1, x2, y2, width = 14, cMain = "#74c69d", cShadow = "#1b4332") {
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo(cx1, cy1, x2, y2);
+      ctx.strokeStyle = cShadow;
+      ctx.lineWidth = width;
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 14;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x0 - 2, y0);
+      ctx.quadraticCurveTo(cx1 - 2, cy1, x2 - 2, y2);
+      ctx.strokeStyle = cMain;
+      ctx.lineWidth = width * 0.5;
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCustomPetal(ctx, x, y, angle, len, wid, pal, opts = {}) {
+      const {
+        shape = "classic",
+        curve = 0,
+        alpha = 1,
+        veinAlpha = 0.35,
+        rimLight = true,
+        innerDark = true
+      } = opts;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.globalAlpha = alpha;
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+
+      if (shape === "notched") {
+        ctx.bezierCurveTo(-wid * 1.08, -len * 0.28, -wid * 1.18, -len * 0.82, -wid * 0.24, -len);
+        ctx.lineTo(0, -len * 0.86);
+        ctx.lineTo(wid * 0.24, -len);
+        ctx.bezierCurveTo(wid * 1.18, -len * 0.82, wid * 1.08, -len * 0.28, 0, 0);
+      } else if (shape === "wavy") {
+        ctx.bezierCurveTo(-wid * 1.12, -len * 0.25, -wid * 1.28, -len * 0.72, -wid * 0.55, -len * 0.94);
+        ctx.quadraticCurveTo(-wid * 0.25, -len * 1.05, 0, -len * 0.96);
+        ctx.quadraticCurveTo(wid * 0.25, -len * 1.05, wid * 0.55, -len * 0.94);
+        ctx.bezierCurveTo(wid * 1.28, -len * 0.72, wid * 1.12, -len * 0.25, 0, 0);
+      } else if (shape === "pointed") {
+        ctx.bezierCurveTo(-wid * 0.98, -len * 0.3, -wid * 0.78, -len * 0.75, curve, -len);
+        ctx.bezierCurveTo(wid * 0.78, -len * 0.75, wid * 0.98, -len * 0.3, 0, 0);
+      } else if (shape === "cupped") {
+        ctx.bezierCurveTo(-wid * 1.18, -len * 0.2, -wid * 1.1, -len * 0.88, 0, -len);
+        ctx.bezierCurveTo(wid * 1.1, -len * 0.88, wid * 1.18, -len * 0.2, 0, 0);
+      } else {
+        ctx.bezierCurveTo(-wid, -len * 0.32, -wid * 0.85, -len * 0.84, curve, -len);
+        ctx.bezierCurveTo(wid * 0.85, -len * 0.84, wid, -len * 0.32, 0, 0);
+      }
+
+      // Tăng độ sâu màu sắc để hoa nổi bật sắc nét trên thẻ bài
+      const grad = ctx.createLinearGradient(0, 0, 0, -len);
+      if (innerDark) {
+        grad.addColorStop(0.0, pal.deep);
+        grad.addColorStop(0.38, pal.secondary);
+        grad.addColorStop(0.82, pal.primary);
+        grad.addColorStop(1.0, "#ffffff");
+      } else {
+        grad.addColorStop(0.0, pal.deep);
+        grad.addColorStop(0.28, pal.secondary);
+        grad.addColorStop(0.72, pal.primary);
+        grad.addColorStop(1.0, "#ffffff");
+      }
+
+      ctx.fillStyle = grad;
+      ctx.shadowColor = "rgba(8, 2, 18, 0.55)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 5;
+      ctx.fill();
+
+      if (veinAlpha > 0) {
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${veinAlpha})`;
+        ctx.lineWidth = 1.5;
+        for (let v = -2; v <= 2; v++) {
+          ctx.beginPath();
+          ctx.moveTo(0, -8);
+          ctx.quadraticCurveTo(v * wid * 0.28, -len * 0.52, v * wid * 0.2, -len * 0.88);
+          ctx.stroke();
+        }
+      }
+
+      if (rimLight) {
+        ctx.strokeStyle = "#ffefc1";
+        ctx.lineWidth = 2.0;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawStamens(ctx, cx, cy, count, radius, colorStem = "#ffccd5", colorTip = "#ffd166") {
+      ctx.save();
+      for (let i = 0; i < count; i++) {
+        const a = (i * Math.PI * 2) / count + Math.sin(i * 3.1) * 0.12;
+        const r = radius * (0.72 + (i % 3) * 0.14);
+        const tx = cx + Math.cos(a) * r;
+        const ty = cy + Math.sin(a) * r;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.quadraticCurveTo(cx + Math.cos(a + 0.15) * r * 0.5, cy + Math.sin(a + 0.15) * r * 0.5, tx, ty);
+        ctx.strokeStyle = colorStem;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(tx, ty, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = colorTip;
+        ctx.shadowColor = colorTip;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function generateFlowerCanvas(flowerKey, size = 1024) {
+      const fData = FLOWERS_DB[flowerKey];
+      const pal = fData.palette;
+      const id = fData.id;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const cx = size / 2, cy = size * 0.46;
+
+      // 1. Hào quang rực rỡ phía sau hoa (Vibrant Botanical Halo)
+      const bgGlow = ctx.createRadialGradient(cx, cy, 15, cx, cy, size * 0.48);
+      bgGlow.addColorStop(0.0, pal.glow + "aa");
+      bgGlow.addColorStop(0.45, pal.secondary + "55");
+      bgGlow.addColorStop(0.8, pal.deep + "22");
+      bgGlow.addColorStop(1.0, "rgba(0,0,0,0)");
+      ctx.fillStyle = bgGlow;
+      ctx.fillRect(0, 0, size, size);
+
+      // Vẽ những chiếc lá vàng hồng trang trí tỏa ra phía sau mọi loài hoa để bố cục đầy đặn
+      drawBotanicalLeaf(ctx, cx - 80, cy + 90, -1.15, 220, 56, "#f5cba7", "#5c3a21");
+      drawBotanicalLeaf(ctx, cx + 80, cy + 90, 1.15, 220, 56, "#f5cba7", "#5c3a21");
+      drawBotanicalLeaf(ctx, cx - 60, cy - 80, -0.65, 195, 48, "#95d5b2", "#1b4332");
+      drawBotanicalLeaf(ctx, cx + 60, cy - 80, 0.65, 195, 48, "#95d5b2", "#1b4332");
+
+      // 2. VẼ RIÊNG TỪNG LOÀI HOA VỚI BỐ CỤC NHIỀU BÔNG PHONG PHÚ & SẮC NÉT
+      if (id === "sunflower") {
+        drawStem(ctx, cx, cy + 40, cx - 25, cy + 250, cx + 10, size * 0.95, 20);
+        drawBotanicalLeaf(ctx, cx - 15, cy + 200, -0.85, 230, 82);
+        drawBotanicalLeaf(ctx, cx + 15, cy + 240, 0.8, 215, 76);
+
+        for (let layer = 2; layer >= 0; layer--) {
+          const count = 28;
+          const len = 265 - layer * 20;
+          const wid = 38 - layer * 3;
+          for (let i = 0; i < count; i++) {
+            const a = (i * Math.PI * 2) / count + layer * 0.12;
+            const curve = Math.sin(i * 1.7 + layer) * 10;
+            drawCustomPetal(ctx, cx, cy, a, len, wid, pal, { shape: "pointed", curve, veinAlpha: 0.42 });
+          }
+        }
+        ctx.save();
+        const coreGrad = ctx.createRadialGradient(cx, cy, 5, cx, cy, 98);
+        coreGrad.addColorStop(0, "#1f0b00");
+        coreGrad.addColorStop(0.7, "#4a1f04");
+        coreGrad.addColorStop(1, "#b35400");
+        ctx.beginPath(); ctx.arc(cx, cy, 98, 0, Math.PI * 2);
+        ctx.fillStyle = coreGrad; ctx.fill();
+
+        const goldenAngle = 137.508 * (Math.PI / 180);
+        for (let n = 0; n < 240; n++) {
+          const r = Math.sqrt(n) * 6.0;
+          const theta = n * goldenAngle;
+          const sx = cx + r * Math.cos(theta);
+          const sy = cy + r * Math.sin(theta);
+          ctx.beginPath();
+          ctx.arc(sx, sy, n > 170 ? 3.6 : 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = n > 175 ? "#ffd166" : (n % 2 === 0 ? "#994d00" : "#3b1700");
+          ctx.fill();
+        }
+        ctx.restore();
+
+      } else if (id === "sakura") {
+        // NHÀNH ĐÀO NHẬT BẢN RỰC RỠ: Cành cây uốn nghệ thuật + 1 đại đóa trung tâm + 2 bông phụ + 3 nụ hồng + mưa cánh đào
+        drawStem(ctx, cx - 240, size * 0.88, cx - 30, cy + 120, cx + 220, cy - 210, 18, "#8d6e63", "#3e2723");
+        drawStem(ctx, cx - 50, cy + 95, cx - 140, cy - 20, cx - 190, cy - 135, 11, "#8d6e63", "#3e2723");
+        drawBotanicalLeaf(ctx, cx - 70, cy + 120, -0.6, 150, 46, "#95d5b2", "#1b4332");
+        drawBotanicalLeaf(ctx, cx + 115, cy - 90, 0.75, 140, 42, "#95d5b2", "#1b4332");
+
+        // Hàm vẽ 1 bông hoa Anh Đào sắc nét có chiều sâu tâm hồng đỏ
+        const drawSakuraBloom = (bx, by, radius, rotOff = 0) => {
+          for (let i = 0; i < 5; i++) {
+            const a = (i * Math.PI * 2) / 5 + rotOff;
+            drawCustomPetal(ctx, bx, by, a, radius, radius * 0.58, pal, {
+              shape: "notched",
+              innerDark: true,
+              veinAlpha: 0.45
+            });
+          }
+          const cGrad = ctx.createRadialGradient(bx, by, 2, bx, by, radius * 0.32);
+          cGrad.addColorStop(0, "#a4133c");
+          cGrad.addColorStop(0.55, "#ff4d6d");
+          cGrad.addColorStop(1, "rgba(255,77,109,0)");
+          ctx.fillStyle = cGrad;
+          ctx.beginPath(); ctx.arc(bx, by, radius * 0.32, 0, Math.PI * 2); ctx.fill();
+          drawStamens(ctx, bx, by, 28, radius * 0.38, "#ff4d6d", "#ffefc1");
+        };
+
+        // 2 Bông phụ hai bên
+        drawSakuraBloom(cx + 150, cy - 145, 118, 0.35);
+        drawSakuraBloom(cx - 155, cy - 95, 108, -0.25);
+        // Đại đóa Anh Đào chính ở trung tâm
+        drawSakuraBloom(cx, cy + 25, 225, -Math.PI / 5);
+
+      } else if (id === "hydrangea") {
+        drawStem(ctx, cx, cy + 60, cx + 15, cy + 250, cx - 10, size * 0.95, 18);
+        drawBotanicalLeaf(ctx, cx - 20, cy + 190, -0.8, 240, 98);
+        drawBotanicalLeaf(ctx, cx + 20, cy + 205, 0.8, 230, 94);
+
+        const florets = 34;
+        for (let i = 0; i < florets; i++) {
+          const r = Math.sqrt(i / florets) * 215;
+          const a = i * 2.39996;
+          const fx = cx + Math.cos(a) * r;
+          const fy = cy + Math.sin(a) * r * 0.92;
+          const fScale = 0.82 + (1 - i / florets) * 0.35;
+          const subPal = {
+            deep: i % 3 === 0 ? "#0077b6" : "#5a189a",
+            secondary: i % 2 === 0 ? "#48cae4" : "#9d4edd",
+            primary: "#caf0f8",
+            accent: "#ffffff"
+          };
+          for (let p = 0; p < 4; p++) {
+            const pa = (p * Math.PI) / 2 + (i * 0.4);
+            drawCustomPetal(ctx, fx, fy, pa, 84 * fScale, 62 * fScale, subPal, { shape: "cupped", veinAlpha: 0.32 });
+          }
+          ctx.beginPath(); ctx.arc(fx, fy, 7 * fScale, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffefc1"; ctx.fill();
+        }
+
+      } else if (id === "peony") {
+        drawStem(ctx, cx, cy + 50, cx - 20, cy + 240, cx + 15, size * 0.95, 18);
+        drawBotanicalLeaf(ctx, cx - 25, cy + 195, -0.85, 220, 76);
+        drawBotanicalLeaf(ctx, cx + 25, cy + 225, 0.85, 210, 72);
+
+        for (let l = 6; l >= 1; l--) {
+          const pCount = 8 + l * 2;
+          const len = 95 + l * 30;
+          const wid = 58 + l * 13;
+          for (let i = 0; i < pCount; i++) {
+            const a = (i * Math.PI * 2) / pCount + l * 0.55;
+            drawCustomPetal(ctx, cx, cy, a, len, wid, pal, { shape: "wavy", veinAlpha: 0.28 });
+          }
+        }
+        drawStamens(ctx, cx, cy, 48, 68, "#ffb703", "#fff3b0");
+
+      } else if (id === "tulip") {
+        drawStem(ctx, cx, cy + 60, cx - 10, cy + 240, cx, size * 0.95, 16, "#74c69d", "#2d6a4f");
+        drawBotanicalLeaf(ctx, cx - 12, size * 0.88, -0.25, 420, 68, "#95d5b2", "#1b4332");
+        drawBotanicalLeaf(ctx, cx + 12, size * 0.9, 0.26, 390, 64, "#74c69d", "#1b4332");
+
+        const by = cy + 110;
+        drawCustomPetal(ctx, cx - 42, by, -0.24, 305, 108, pal, { shape: "cupped" });
+        drawCustomPetal(ctx, cx + 42, by, 0.24, 305, 108, pal, { shape: "cupped" });
+        drawCustomPetal(ctx, cx, by - 12, 0, 320, 118, pal, { shape: "cupped" });
+        drawStamens(ctx, cx, by - 190, 16, 48, "#ffd166", "#ffffff");
+        drawCustomPetal(ctx, cx - 32, by + 10, -0.15, 285, 106, pal, { shape: "cupped", veinAlpha: 0.42 });
+        drawCustomPetal(ctx, cx + 32, by + 10, 0.15, 285, 106, pal, { shape: "cupped", veinAlpha: 0.42 });
+        drawCustomPetal(ctx, cx, by + 18, 0, 280, 114, pal, { shape: "cupped", veinAlpha: 0.48 });
+
+      } else if (id === "rose" || id === "camellia") {
+        drawStem(ctx, cx, cy + 50, cx + 22, cy + 250, cx - 12, size * 0.95, 17);
+        drawBotanicalLeaf(ctx, cx - 18, cy + 195, -0.8, 200, 74);
+        drawBotanicalLeaf(ctx, cx + 18, cy + 235, 0.8, 190, 70);
+
+        const maxL = id === "rose" ? 7 : 6;
+        for (let l = maxL; l >= 1; l--) {
+          const pCount = id === "rose" ? (6 + l) : 9;
+          const len = 60 + l * 31;
+          const wid = 48 + l * 16;
+          const rotOffset = l * (id === "rose" ? 0.78 : 0.4);
+          for (let i = 0; i < pCount; i++) {
+            const a = (i * Math.PI * 2) / pCount + rotOffset;
+            drawCustomPetal(ctx, cx, cy, a, len, wid, pal, {
+              shape: id === "rose" ? "wavy" : "cupped",
+              veinAlpha: 0.24
+            });
+          }
+        }
+        drawStamens(ctx, cx, cy, 28, 42, "#ffd166", "#ffffff");
+
+      } else if (id === "daisy") {
+        // KHÓM CÚC HỌA MI: 1 Bông lớn trung tâm + 2 bông nhỏ hai bên
+        drawStem(ctx, cx, cy + 30, cx - 18, cy + 240, cx + 8, size * 0.95, 14);
+        drawStem(ctx, cx, cy + 190, cx - 120, cy + 40, cx - 155, cy - 85, 10);
+        drawStem(ctx, cx, cy + 210, cx + 120, cy + 60, cx + 155, cy - 65, 10);
+
+        const drawDaisy = (dx, dy, pLen, pWid) => {
+          for (let l = 1; l >= 0; l--) {
+            const count = 24;
+            for (let i = 0; i < count; i++) {
+              const a = (i * Math.PI * 2) / count + l * 0.13;
+              drawCustomPetal(ctx, dx, dy, a, pLen - l * 15, pWid - l * 2, pal, { shape: "classic", innerDark: true, veinAlpha: 0.35 });
+            }
+          }
+          const cGrad = ctx.createRadialGradient(dx, dy, 4, dx, dy, pLen * 0.25);
+          cGrad.addColorStop(0, "#b45309");
+          cGrad.addColorStop(0.65, "#fbbf24");
+          cGrad.addColorStop(1, "#f59e0b");
+          ctx.beginPath(); ctx.arc(dx, dy, pLen * 0.25, 0, Math.PI * 2);
+          ctx.fillStyle = cGrad; ctx.shadowColor = "#fbbf24"; ctx.shadowBlur = 18; ctx.fill();
+        };
+
+        drawDaisy(cx - 155, cy - 85, 115, 16);
+        drawDaisy(cx + 155, cy - 65, 110, 15);
+        drawDaisy(cx, cy + 10, 235, 31);
+
+      } else if (id === "orchid") {
+        drawStem(ctx, cx + 110, size * 0.94, cx + 70, cy + 120, cx - 60, cy - 160, 14, "#52b788", "#1b4332");
+        // Bông Lan phụ phía trên
+        const subX = cx - 55, subY = cy - 145;
+        drawCustomPetal(ctx, subX, subY, 0, 115, 42, pal, { shape: "cupped" });
+        drawCustomPetal(ctx, subX, subY, -1.22, 130, 72, pal, { shape: "wavy" });
+        drawCustomPetal(ctx, subX, subY, 1.22, 130, 72, pal, { shape: "wavy" });
+
+        // Đại đóa Lan Hồ Điệp trung tâm
+        drawCustomPetal(ctx, cx + 10, cy + 25, 0, 235, 82, pal, { shape: "cupped" });
+        drawCustomPetal(ctx, cx + 10, cy + 25, -2.15, 215, 76, pal, { shape: "pointed" });
+        drawCustomPetal(ctx, cx + 10, cy + 25, 2.15, 215, 76, pal, { shape: "pointed" });
+        drawCustomPetal(ctx, cx + 10, cy + 25, -1.22, 260, 145, pal, { shape: "wavy", veinAlpha: 0.42 });
+        drawCustomPetal(ctx, cx + 10, cy + 25, 1.22, 260, 145, pal, { shape: "wavy", veinAlpha: 0.42 });
+        const lipPal = { deep: "#4a044e", secondary: "#f59e0b", primary: "#fef08a", accent: "#ffffff" };
+        drawCustomPetal(ctx, cx + 10, cy + 35, Math.PI, 130, 66, lipPal, { shape: "notched", veinAlpha: 0.45 });
+        ctx.beginPath(); ctx.arc(cx + 10, cy + 32, 18, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff"; ctx.shadowColor = "#fbbf24"; ctx.shadowBlur = 15; ctx.fill();
+
+      } else if (id === "dandelion") {
+        drawStem(ctx, cx, cy + 20, cx - 20, cy + 240, cx + 10, size * 0.95, 14, "#74c69d", "#2d6a4f");
+        ctx.save();
+        const rays = 96;
+        for (let i = 0; i < rays; i++) {
+          const a = (i * Math.PI * 2) / rays + (i % 3) * 0.04;
+          const len = 165 + (i % 4) * 32;
+          const ex = cx + Math.cos(a) * len;
+          const ey = cy + Math.sin(a) * len;
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(ex, ey);
+          ctx.strokeStyle = "rgba(255, 239, 193, 0.7)";
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+
+          for (let f = -2; f <= 2; f++) {
+            const fa = a + f * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(ex, ey);
+            ctx.lineTo(ex + Math.cos(fa) * 26, ey + Math.sin(fa) * 26);
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.3;
+            ctx.stroke();
+          }
+          ctx.beginPath();
+          ctx.arc(ex, ey, 3.8, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.shadowColor = "#a2d2ff";
+          ctx.shadowBlur = 12;
+          ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffe599"; ctx.fill();
+        ctx.restore();
+
+      } else if (id === "lily_valley") {
+        drawBotanicalLeaf(ctx, cx - 35, size * 0.88, -0.32, 460, 120, "#74c69d", "#1b4332");
+        drawBotanicalLeaf(ctx, cx + 45, size * 0.9, 0.22, 440, 112, "#52b788", "#1b4332");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx - 10, size * 0.92);
+        ctx.bezierCurveTo(cx - 95, cy + 80, cx - 40, cy - 190, cx + 145, cy - 210);
+        ctx.strokeStyle = "#95d5b2";
+        ctx.lineWidth = 12;
+        ctx.lineCap = "round";
+        ctx.stroke();
+        ctx.restore();
+
+        const bells = [
+          { x: cx - 50, y: cy + 60, s: 1.18 },
+          { x: cx - 52, y: cy - 12, s: 1.12 },
+          { x: cx - 32, y: cy - 78, s: 1.05 },
+          { x: cx + 5,  y: cy - 132, s: 0.98 },
+          { x: cx + 52, y: cy - 170, s: 0.90 },
+          { x: cx + 102, y: cy - 192, s: 0.80 },
+          { x: cx + 145, y: cy - 202, s: 0.68 }
+        ];
+        bells.forEach((b) => {
+          ctx.beginPath();
+          ctx.moveTo(b.x, b.y - 28 * b.s);
+          ctx.quadraticCurveTo(b.x + 18 * b.s, b.y - 12 * b.s, b.x + 14 * b.s, b.y + 8 * b.s);
+          ctx.strokeStyle = "#f5cba7"; ctx.lineWidth = 3.5; ctx.stroke();
+
+          ctx.save();
+          ctx.translate(b.x + 14 * b.s, b.y + 8 * b.s);
+          ctx.rotate(-0.18);
+          const sc = b.s * 58;
+          const bGrad = ctx.createRadialGradient(0, sc * 0.35, 2, 0, sc * 0.45, sc * 1.1);
+          bGrad.addColorStop(0, "#ffffff");
+          bGrad.addColorStop(0.65, "#d8f3dc");
+          bGrad.addColorStop(1, "#74c69d");
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(-sc * 0.85, sc * 0.1, -sc * 0.95, sc * 0.85, -sc * 0.55, sc);
+          ctx.lineTo(-sc * 0.25, sc * 0.86);
+          ctx.lineTo(0, sc * 1.04);
+          ctx.lineTo(sc * 0.25, sc * 0.86);
+          ctx.lineTo(sc * 0.55, sc);
+          ctx.bezierCurveTo(sc * 0.95, sc * 0.85, sc * 0.85, sc * 0.1, 0, 0);
+          ctx.fillStyle = bGrad;
+          ctx.shadowColor = "rgba(149, 213, 178, 0.85)";
+          ctx.shadowBlur = 20;
+          ctx.fill();
+          ctx.strokeStyle = "#ffefc1"; ctx.lineWidth = 2; ctx.stroke();
+          ctx.restore();
+        });
+
+      } else if (id === "wisteria") {
+        drawStem(ctx, cx - 240, cy - 230, cx, cy - 190, cx + 240, cy - 220, 16, "#8d6e63", "#3e2723");
+        const strings = [-115, -38, 38, 115];
+        strings.forEach((ox, sIdx) => {
+          const rows = (sIdx === 1 || sIdx === 2) ? 10 : 8;
+          const startY = cy - 175 + Math.abs(ox) * 0.18;
+          for (let r = 0; r < rows; r++) {
+            const ratio = 1 - (r / rows) * 0.5;
+            const fy = startY + r * 44;
+            const fx = cx + ox + Math.sin(r * 0.9 + sIdx) * 10;
+            drawCustomPetal(ctx, fx, fy, Math.PI - 0.35, 64 * ratio, 40 * ratio, pal, { shape: "cupped" });
+            drawCustomPetal(ctx, fx, fy, Math.PI + 0.35, 64 * ratio, 40 * ratio, pal, { shape: "cupped" });
+            drawCustomPetal(ctx, fx, fy - 6, Math.PI, 72 * ratio, 48 * ratio, pal, { shape: "wavy" });
+          }
+        });
+
+      } else if (id === "lavender") {
+        const stalks = [
+          { dx: -110, rot: -0.2, h: 0.9 },
+          { dx: -55,  rot: -0.09, h: 0.98 },
+          { dx: 0,    rot: 0,     h: 1.08 },
+          { dx: 55,   rot: 0.09,  h: 0.98 },
+          { dx: 110,  rot: 0.2,   h: 0.9 }
+        ];
+        stalks.forEach((st) => {
+          ctx.save();
+          ctx.translate(cx + st.dx, size * 0.88);
+          ctx.rotate(st.rot);
+          drawStem(ctx, 0, 0, 0, -220 * st.h, 0, -490 * st.h, 10, "#74c69d", "#2d6a4f");
+          for (let b = 0; b < 12; b++) {
+            const by = -190 * st.h - b * 26 * st.h;
+            const sc = (1 - b * 0.04) * st.h;
+            drawCustomPetal(ctx, -7, by, -0.55, 48 * sc, 25 * sc, pal, { shape: "pointed" });
+            drawCustomPetal(ctx, 7, by, 0.55, 48 * sc, 25 * sc, pal, { shape: "pointed" });
+            drawCustomPetal(ctx, 0, by - 6, 0, 50 * sc, 27 * sc, pal, { shape: "cupped" });
+          }
+          ctx.restore();
+        });
+
+      } else if (id === "iris" || id === "lily") {
+        drawStem(ctx, cx, cy + 50, cx - 15, cy + 250, cx + 10, size * 0.95, 17);
+        drawBotanicalLeaf(ctx, cx - 18, cy + 230, -0.45, 260, 54);
+        drawBotanicalLeaf(ctx, cx + 18, cy + 240, 0.45, 250, 52);
+
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3 + Math.PI / 3;
+          drawCustomPetal(ctx, cx, cy, a, 265, 96, pal, { shape: id === "iris" ? "wavy" : "pointed", veinAlpha: 0.42 });
+        }
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3;
+          drawCustomPetal(ctx, cx, cy, a, 250, 106, pal, { shape: id === "iris" ? "wavy" : "pointed", veinAlpha: 0.48 });
+        }
+        drawStamens(ctx, cx, cy, 8, 95, "#ffd166", "#d97706");
+
+      } else if (id === "lotus" || id === "magnolia") {
+        drawStem(ctx, cx, cy + 70, cx + 15, cy + 260, cx - 8, size * 0.95, 17);
+        drawBotanicalLeaf(ctx, cx - 30, cy + 210, -0.78, 210, 84);
+        drawBotanicalLeaf(ctx, cx + 30, cy + 220, 0.78, 210, 84);
+
+        for (let l = 4; l >= 1; l--) {
+          const pCount = 8;
+          const len = 130 + l * 36;
+          const wid = 64 + l * 12;
+          for (let i = 0; i < pCount; i++) {
+            const a = (i * Math.PI * 2) / pCount + l * 0.39;
+            drawCustomPetal(ctx, cx, cy + 15, a, len, wid, pal, {
+              shape: id === "lotus" ? "pointed" : "cupped",
+              innerDark: true,
+              veinAlpha: 0.38
+            });
+          }
+        }
+        drawStamens(ctx, cx, cy + 15, 32, 62, "#fde68a", "#f59e0b");
+
+      } else {
+        // HOA QUỲNH ĐÊM (SSR-2)
+        drawStem(ctx, cx - 90, size * 0.94, cx - 60, cy + 160, cx, cy + 30, 16, "#40916c", "#1b4332");
+        for (let l = 4; l >= 1; l--) {
+          const count = 14 + l * 2;
+          const len = 125 + l * 38;
+          const wid = 28 + l * 7;
+          for (let i = 0; i < count; i++) {
+            const a = (i * Math.PI * 2) / count + l * 0.25;
+            const curve = Math.sin(i * 1.5 + l) * 14;
+            drawCustomPetal(ctx, cx, cy, a, len, wid, pal, { shape: "pointed", curve, innerDark: true, veinAlpha: 0.38 });
+          }
+        }
+        drawStamens(ctx, cx, cy, 40, 74, "#caf0f8", "#ffd166");
+      }
+
+      // 3. Vẽ những cánh hoa bay lơ lửng trong gió & sao 4 cánh lấp lánh quanh mặt bài
+      const floatingCoords = [
+        [-270, -240, 0.6, 0.52], [260, -220, -0.8, 0.48],
+        [-290, 90, 1.1, 0.45],   [285, 110, -1.2, 0.50],
+        [-180, -320, 0.4, 0.40], [195, 250, -0.5, 0.44]
+      ];
+      floatingCoords.forEach(([dx, dy, rot, sc]) => {
+        drawCustomPetal(ctx, cx + dx, cy + dy, rot, 95 * sc, 52 * sc, pal, { shape: "notched", alpha: 0.85 });
+      });
+
+      // Sao 4 cánh vàng kim lấp lánh
+      const starCoords = [[-220, -120, 18], [230, -80, 16], [-190, 180, 15], [210, 170, 19], [0, -290, 22]];
+      starCoords.forEach(([dx, dy, r]) => {
+        const sx = cx + dx, sy = cy + dy;
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.beginPath();
+        ctx.moveTo(0, -r); ctx.quadraticCurveTo(3, -3, r, 0);
+        ctx.quadraticCurveTo(3, 3, 0, r);
+        ctx.quadraticCurveTo(-3, 3, -r, 0);
+        ctx.quadraticCurveTo(-3, -3, 0, -r);
+        ctx.fillStyle = "#ffefc1";
+        ctx.shadowColor = "#ffd166";
+        ctx.shadowBlur = 14;
+        ctx.fill();
+        ctx.restore();
+      });
+
+      return canvas;
+    }
+
+    function getFlowerTexture(flowerKey) {
+      if (!textureCache[flowerKey]) {
+        const canvas = generateFlowerCanvas(flowerKey, 1024);
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 4;
+        textureCache[flowerKey] = tex;
+      }
+      return textureCache[flowerKey];
+    }
+
+    // Tạo Mặt Nền Thẻ Bài Tarot Hoàng Gia Đầy Đặn (Celestial Sunburst + Sacred Mandala + Tên Hoa)
+    function getRichCardBackdropTexture(flowerKey) {
+      if (cardBackdropCache[flowerKey]) return cardBackdropCache[flowerKey];
+
+      const fData = FLOWERS_DB[flowerKey];
+      const pal = fData.palette;
+      const w = 720, h = 1040;
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      const cx = w / 2, cy = h * 0.45;
+
+      // 1. Nền lụa Hoàng Gia chuyển màu theo loài hoa (không còn đen trống trải)
+      const bgGrad = ctx.createRadialGradient(cx, cy, 30, cx, cy, h * 0.65);
+      bgGrad.addColorStop(0.0, pal.deep);
+      bgGrad.addColorStop(0.55, "#1d0936");
+      bgGrad.addColorStop(1.0, "#090314");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. 36 Tia Sáng Mặt Trời Vàng Kim (Celestial Sunburst Rays) tỏa ra từ tâm
+      ctx.save();
+      ctx.translate(cx, cy);
+      for (let i = 0; i < 36; i++) {
+        const a = (i * Math.PI * 2) / 36;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a) * 480, Math.sin(a) * 480);
+        ctx.strokeStyle = i % 2 === 0 ? "rgba(245, 203, 167, 0.16)" : "rgba(255, 239, 193, 0.07)";
+        ctx.lineWidth = i % 2 === 0 ? 2.2 : 1.0;
+        ctx.stroke();
+      }
+
+      // Ngôi sao 8 cánh Hình Học Thiêng (Sacred Octagram) & Vòng Mandala
+      ctx.strokeStyle = "rgba(245, 203, 167, 0.32)";
+      ctx.lineWidth = 2;
+      for (let r = 0; r < 2; r++) {
+        ctx.save();
+        ctx.rotate((r * Math.PI) / 4);
+        ctx.strokeRect(-195, -195, 390, 390);
+        ctx.restore();
+      }
+      ctx.beginPath(); ctx.arc(0, 0, 275, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([8, 8]);
+      ctx.beginPath(); ctx.arc(0, 0, 295, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+
+      // 3. Vòm Cung Điện Tinh Tú (Art Nouveau Celestial Archway)
+      ctx.save();
+      ctx.strokeStyle = "#f5cba7";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(58, h - 180);
+      ctx.lineTo(58, 340);
+      ctx.arc(cx, 340, w / 2 - 58, Math.PI, 0, false);
+      ctx.lineTo(w - 58, h - 180);
+      ctx.stroke();
+
+      // Trăng Lưỡi Liềm & Sao Bắc Đẩu ở đỉnh vòm thẻ bài
+      ctx.fillStyle = "#ffefc1";
+      ctx.beginPath();
+      ctx.arc(cx, 128, 26, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#1a0830";
+      ctx.beginPath();
+      ctx.arc(cx + 10, 122, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 4. Bảng Tên Hoàng Gia (Golden Cartouche Plaque) ở phần dưới mặt bài
+      ctx.save();
+      const py = h - 165, pw = 540, ph = 96;
+      const px = (w - pw) / 2;
+      const pGrad = ctx.createLinearGradient(px, py, px, py + ph);
+      pGrad.addColorStop(0, "rgba(32, 12, 54, 0.92)");
+      pGrad.addColorStop(1, "rgba(14, 4, 26, 0.96)");
+      ctx.fillStyle = pGrad;
+      ctx.strokeStyle = "#f5cba7";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(px, py, pw, ph, 18);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffefc1";
+      ctx.font = "800 30px 'Playfair Display', serif";
+      ctx.textAlign = "center";
+      ctx.fillText(fData.name.toUpperCase(), cx, py + 44);
+
+      ctx.fillStyle = "#f5cba7";
+      ctx.font = "italic 600 20px 'Cormorant Garamond', serif";
+      ctx.fillText(`✦  ${fData.title} • ${fData.latin}  ✦`, cx, py + 76);
+      ctx.restore();
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      cardBackdropCache[flowerKey] = tex;
+      return tex;
+    }
+
+    // Tạo Texture Khung Viền Nổi Thẻ Bài Tarot Hoàng Gia
+    function createTarotFrameTexture() {
+      const w = 720, h = 1040;
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+
+      ctx.strokeStyle = "#f5cba7";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(24, 24, w - 48, h - 48);
+
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(255, 239, 193, 0.65)";
+      ctx.strokeRect(36, 36, w - 72, h - 72);
+
+      // Hoa văn góc Art Deco mạ vàng
+      const corners = [
+        [24, 24, 1, 1],
+        [w - 24, 24, -1, 1],
+        [24, h - 24, 1, -1],
+        [w - 24, h - 24, -1, -1]
+      ];
+      corners.forEach(([x, y, sx, sy]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(sx, sy);
+        ctx.strokeStyle = "#ffefc1";
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(0, 64); ctx.quadraticCurveTo(32, 32, 64, 0);
+        ctx.moveTo(12, 84); ctx.quadraticCurveTo(45, 45, 84, 12);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(28, 28, 6, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffefc1";
+        ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.fillStyle = "#ffefc1";
+      ctx.font = "600 20px 'Cormorant Garamond', serif";
+      ctx.textAlign = "center";
+      ctx.fillText("✦  B O T A N I C A L   A R C A N A  ✦", w / 2, 64);
+      ctx.fillText("❖  2 0  •  1 0  ❖", w / 2, h - 42);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // =========================================================================
+    // 4. KHÔNG GIAN 3D THREE.JS (ĐÀI SEN PHA LÊ + THẺ BÀI TAROT HOLOGRAM 3D)
+    // =========================================================================
+    const canvasEl = document.getElementById('bg-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0.15, 6.6);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    // Ánh sáng đa chiều sang trọng
+    scene.add(new THREE.AmbientLight(0xffe5f0, 1.15));
+    const mainLight = new THREE.PointLight(0xff88cc, 6, 20);
+    mainLight.position.set(2.5, 3.2, 4.5);
+    scene.add(mainLight);
+
+    const rimLight = new THREE.PointLight(0xf5cba7, 4, 16);
+    rimLight.position.set(-3, -2, 3);
+    scene.add(rimLight);
+
+    // Đom đóm bokeh tròn mềm bay toàn cảnh
+    function createSoftDotTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 64;
+      const g = c.getContext('2d').createRadialGradient(32, 32, 2, 32, 32, 30);
+      g.addColorStop(0, "rgba(255,255,255,1)");
+      g.addColorStop(0.4, "rgba(255,225,200,0.6)");
+      g.addColorStop(1, "rgba(255,255,255,0)");
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const pCount = 180;
+    const pGeo = new THREE.BufferGeometry();
+    const pPos = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 11;
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    const particles = new THREE.Points(
+      pGeo,
+      new THREE.PointsMaterial({
+        map: createSoftDotTexture(),
+        color: 0xffefc1,
+        size: 0.14,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+    scene.add(particles);
+
+    // --- NHÓM 1: TUYỆT TÁC HOA HỒNG LỤA 3D NỞ TỪNG CÁNH (SCULPTED 3D SILK ROSE) ---
+    const seedGroup = new THREE.Group();
+    scene.add(seedGroup);
+
+    // 1. Tạo Texture Lụa Chuyển Sắc (Silk Botanical Gradient + Veins) cho Cánh Hoa 3D
+    function createSilkPetalTexture() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
+
+      // Nền chuyển sắc từ gốc cánh (dưới) lên đỉnh cánh (trên)
+      const grad = ctx.createLinearGradient(0, 512, 0, 0);
+      grad.addColorStop(0.0, "#590d22");   // Gốc cánh đỏ trầm tạo chiều sâu
+      grad.addColorStop(0.28, "#c9184a");  // Thân dưới hồng ngọc
+      grad.addColorStop(0.68, "#ff758f");  // Thân trên hồng phấn tươi
+      grad.addColorStop(0.92, "#ffccd5");  // Mép cánh hồng kem sáng
+      grad.addColorStop(1.0, "#fff8fa");   // Đỉnh cánh bắt sáng trắng ngọc
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Ánh sáng tỏa tròn ở tâm cánh hoa
+      const rad = ctx.createRadialGradient(256, 200, 10, 256, 240, 250);
+      rad.addColorStop(0, "rgba(255, 230, 240, 0.35)");
+      rad.addColorStop(1, "rgba(89, 13, 34, 0.15)");
+      ctx.fillStyle = rad;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Các đường gân lụa mảnh chạy dọc cánh hoa
+      ctx.strokeStyle = "rgba(255, 245, 250, 0.22)";
+      ctx.lineWidth = 2;
+      for (let i = -6; i <= 6; i++) {
+        ctx.beginPath();
+        ctx.moveTo(256 + i * 8, 500);
+        ctx.quadraticCurveTo(256 + i * 38, 250, 256 + i * 24, 18);
+        ctx.stroke();
+      }
+
+      // Viền vàng kim mỏng ở mép đỉnh cánh hoa
+      const rim = ctx.createLinearGradient(0, 40, 0, 0);
+      rim.addColorStop(0, "rgba(255, 239, 193, 0)");
+      rim.addColorStop(1, "rgba(255, 239, 193, 0.65)");
+      ctx.fillStyle = rim;
+      ctx.fillRect(0, 0, 512, 45);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // 2. Tạo Texture Lá Hoa Hồng có gân sáng
+    function createLeafTexture3D() {
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 256, 0, 0);
+      g.addColorStop(0, "#123022");
+      g.addColorStop(0.5, "#2d6a4f");
+      g.addColorStop(1, "#74c69d");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 256, 256);
+
+      ctx.strokeStyle = "rgba(216, 243, 220, 0.45)";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(128, 256); ctx.lineTo(128, 10); ctx.stroke();
+      ctx.lineWidth = 1.8;
+      for (let i = 1; i <= 5; i++) {
+        const y = 240 - i * 38;
+        ctx.beginPath();
+        ctx.moveTo(128, y); ctx.quadraticCurveTo(80, y - 15, 20, y - 35);
+        ctx.moveTo(128, y); ctx.quadraticCurveTo(176, y - 15, 236, y - 35);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // 3. Điêu khắc Hình học 3D Cánh Hoa Hồng (Khối PlaneGeometry uốn cong 3 chiều + lật mép cánh S-curve)
+    function createSculptedRosePetalGeo(width = 0.36, height = 0.56, cupDepth = 0.13, curlAmount = 0.12) {
+      const geo = new THREE.PlaneGeometry(1, 1, 24, 24);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const u = pos.getX(i); // -0.5 -> 0.5
+        const v = pos.getY(i) + 0.5; // 0.0 (gốc cánh) -> 1.0 (đỉnh cánh)
+
+        // Biên dạng chiều ngang của cánh hoa hồng: gốc hẹp, bụng phình tròn, đỉnh bo tim nhẹ
+        const widthProfile = Math.sin(Math.pow(v, 0.65) * Math.PI) * (1 - 0.12 * Math.pow(1 - v, 2)) + 0.08 * (1 - v);
+        const x = u * width * widthProfile * 2.05;
+
+        // Chiều cao cánh + lượn sóng nhẹ ở mép trên
+        const topNotch = (1 - Math.pow(u * 2, 2)) * 0.04 * Math.pow(v, 3);
+        const y = v * height + topNotch;
+
+        // Độ khum lòng chảo (cupping) kết hợp uốn cong lật mép ra ngoài ở đỉnh cánh (S-curve rose curl)
+        const radialU = u * 2; // -1 -> 1
+        const transverseCup = (1 - radialU * radialU) * cupDepth * Math.sin(v * Math.PI);
+        const longitudinalCurve = Math.sin(v * Math.PI * 0.85) * (cupDepth * 0.85);
+        const tipBackCurl = Math.pow(Math.max(0, v - 0.62) / 0.38, 2.1) * curlAmount;
+        const edgeRuffle = Math.sin(radialU * Math.PI * 1.5) * 0.015 * Math.pow(v, 2);
+
+        const z = transverseCup + longitudinalCurve - tipBackCurl + edgeRuffle;
+        pos.setXYZ(i, x, y, z);
+      }
+
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    const rosePetalTex = createSilkPetalTexture();
+    const petalSilkMat = new THREE.MeshPhysicalMaterial({
+      map: rosePetalTex,
+      color: 0xffffff,
+      emissive: 0x3a0519,
+      emissiveIntensity: 0.28,
+      roughness: 0.32,
+      metalness: 0.05,
+      clearcoat: 0.45,
+      clearcoatRoughness: 0.25,
+      transmission: 0.15,
+      side: THREE.DoubleSide
+    });
+
+    const leafTex3D = createLeafTexture3D();
+    const leafMat3D = new THREE.MeshStandardMaterial({
+      map: leafTex3D,
+      color: 0xffffff,
+      roughness: 0.42,
+      metalness: 0.08,
+      side: THREE.DoubleSide
+    });
+
+    const stemMat3D = new THREE.MeshStandardMaterial({
+      color: 0x2d6a4f,
+      emissive: 0x081c15,
+      roughness: 0.45,
+      metalness: 0.1
+    });
+
+    // 4. Thân cành hoa 3D uốn lượn tự nhiên + Bầu đài xanh (Receptacle) đỡ dưới đáy hoa
+    const stemCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -1.18, -0.06),
+      new THREE.Vector3(-0.05, -0.68, 0.03),
+      new THREE.Vector3(0.03, -0.28, 0.02),
+      new THREE.Vector3(0, 0.02, 0)
+    ]);
+    const stemMesh = new THREE.Mesh(
+      new THREE.TubeGeometry(stemCurve, 28, 0.026, 12, false),
+      stemMat3D
+    );
+    seedGroup.add(stemMesh);
+
+    // Bầu hoa đầy đặn (group chứa đầu bông hoa hơi nghiêng về phía camera)
+    const flowerHead = new THREE.Group();
+    flowerHead.position.set(0, 0.02, 0);
+    flowerHead.rotation.x = 0.36;
+    seedGroup.add(flowerHead);
+
+    // Đài hoa xanh (Calyx base + 5 cánh đài Sepals ôm sát đáy bông hoa, che kín gốc cánh)
+    const calyxBase = new THREE.Mesh(
+      new THREE.ConeGeometry(0.11, 0.16, 16),
+      stemMat3D
+    );
+    calyxBase.rotation.x = Math.PI; // Đỉnh nón chúc xuống nối liền vào thân cành
+    calyxBase.position.y = -0.04;
+    flowerHead.add(calyxBase);
+
+    const sepalGeo = createSculptedRosePetalGeo(0.11, 0.34, 0.05, 0.16);
+    for (let s = 0; s < 5; s++) {
+      const sPivot = new THREE.Group();
+      sPivot.rotation.y = (s * Math.PI * 2) / 5;
+      const sMesh = new THREE.Mesh(sepalGeo, leafMat3D);
+      sMesh.rotation.x = 0.95;
+      sPivot.add(sMesh);
+      flowerHead.add(sPivot);
+    }
+
+    // 3 Chiếc lá hoa hồng 3D dọc theo thân cành
+    const stemLeaves = [];
+    const leafGeo3D = createSculptedRosePetalGeo(0.24, 0.48, 0.06, 0.14);
+    [
+      { dir: -1, y: -0.38, rotZ: 0.92, rotY: -0.35, s: 0.85 },
+      { dir: 1,  y: -0.58, rotZ: -0.98, rotY: 0.4,  s: 0.95 },
+      { dir: -1, y: -0.82, rotZ: 1.05, rotY: -0.25, s: 0.75 }
+    ].forEach((cfg) => {
+      const leafPivot = new THREE.Group();
+      leafPivot.position.set(cfg.dir * 0.02, cfg.y, 0.01);
+      leafPivot.rotation.z = cfg.rotZ;
+      leafPivot.rotation.y = cfg.rotY;
+      const lMesh = new THREE.Mesh(leafGeo3D, leafMat3D);
+      lMesh.rotation.x = 0.35;
+      leafPivot.add(lMesh);
+      leafPivot.userData = { baseScale: cfg.s, targetScale: cfg.s * 0.45 };
+      leafPivot.scale.setScalar(cfg.s * 0.45);
+      seedGroup.add(leafPivot);
+      stemLeaves.push(leafPivot);
+    });
+
+    // Tâm sáng nhỏ ẩn sâu trong lòng nụ hoa (không bao giờ bị lòi xuống dưới đáy)
+    const innerGlowLight = new THREE.PointLight(0xffb3c6, 2.2, 1.8);
+    innerGlowLight.position.set(0, 0.22, 0);
+    flowerHead.add(innerGlowLight);
+
+    // 5. Tạo 34 Cánh Hoa Hồng 3D xếp xoắn ốc theo Tỷ Lệ Vàng Fibonacci (137.508 độ)
+    const bloomPetals = [];
+    const TOTAL_PETALS = 34;
+    const GOLDEN_ANGLE = 137.508 * (Math.PI / 180);
+
+    // Tạo 4 kích cỡ cánh từ nhỏ (lõi nụ) đến lớn (cánh ngoài cùng)
+    const tierGeos = [
+      createSculptedRosePetalGeo(0.22, 0.38, 0.14, 0.04), // Lõi nụ cuộn chặt
+      createSculptedRosePetalGeo(0.30, 0.48, 0.15, 0.09), // Tầng trong
+      createSculptedRosePetalGeo(0.38, 0.58, 0.15, 0.15), // Tầng giữa
+      createSculptedRosePetalGeo(0.46, 0.68, 0.14, 0.22)  // Tầng đại đóa ngoài cùng
+    ];
+
+    for (let i = 0; i < TOTAL_PETALS; i++) {
+      const tRatio = i / (TOTAL_PETALS - 1); // 0 -> 1
+      const tierIdx = Math.min(3, Math.floor(tRatio * 4));
+      const pivot = new THREE.Group();
+
+      // Góc xoắn Fibonacci giúp các cánh xen kẽ tự nhiên tuyệt đối như hoa hồng thật
+      pivot.rotation.y = i * GOLDEN_ANGLE;
+      // Các cánh ngoài đính hơi thấp hơn một chút quanh đài hoa nhưng ôm khít tâm
+      const radiusOffset = 0.015 + tRatio * 0.065;
+      pivot.position.y = 0.02 - tRatio * 0.03;
+
+      const holder = new THREE.Group();
+      holder.position.z = radiusOffset;
+
+      const pMesh = new THREE.Mesh(tierGeos[tierIdx], petalSilkMat);
+      holder.add(pMesh);
+      pivot.add(holder);
+      flowerHead.add(pivot);
+
+      // Góc khép khi còn là nụ (cuộn khum vào trong) & góc bung mở tối đa khi nở rộ
+      const closedX = 0.06 + tRatio * 0.32;
+      const openX = 0.18 + Math.pow(tRatio, 0.88) * 1.12;
+
+      // Phân bổ 34 cánh hoa nở dần từ câu 1 đến câu 10 (Lúc bắt đầu đã có sẵn 10 cánh trong tạo thành búp nụ xinh xắn)
+      const orderStep = i < 10 ? 0 : Math.ceil(((i - 9) / (TOTAL_PETALS - 10)) * 9);
+      const initScale = orderStep === 0 ? (0.82 + tRatio * 0.18) : 0.001;
+
+      holder.rotation.x = closedX;
+      holder.scale.setScalar(initScale);
+
+      bloomPetals.push({
+        holder,
+        index: i,
+        tRatio,
+        orderStep,
+        closedX,
+        openX,
+        targetScale: initScale,
+        targetRotX: closedX,
+        phase: i * 0.55
+      });
+    }
+
+    // 6. Vòng xoáy Đom Đóm Phép Thuật bay quanh bông hoa (Thay cho 2 vòng dây cứng nhắc cũ)
+    const dustCount = 42;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    const dustData = [];
+    for (let i = 0; i < dustCount; i++) {
+      const a = (i / dustCount) * Math.PI * 4;
+      const r = 0.25 + (i / dustCount) * 0.65;
+      const y = -0.6 + (i / dustCount) * 1.25;
+      dustPos[i * 3] = Math.cos(a) * r;
+      dustPos[i * 3 + 1] = y;
+      dustPos[i * 3 + 2] = Math.sin(a) * r;
+      dustData.push({ angle: a, radius: r, baseY: y, speed: 0.6 + Math.random() * 0.6 });
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const orbitDust = new THREE.Points(
+      dustGeo,
+      new THREE.PointsMaterial({
+        map: createSoftDotTexture(),
+        color: 0xffefc1,
+        size: 0.11,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+    seedGroup.add(orbitDust);
+    seedGroup.position.set(0, 1.25, 0);
+
+    // Hàm cập nhật độ nở của Đóa Hoa Hồng 3D theo từng câu hỏi (step: 0 -> 10)
+    const targetTint = new THREE.Color(0xffffff);
+    const ROSE_TINTS = [
+      0xffffff, 0xffd6e7, 0xffb3c6, 0xf3c4fb, 0xffccd5,
+      0xffe5ec, 0xe0aaff, 0xffc2d1, 0xfde68a, 0xffffff
+    ];
+
+    function update3DFlowerBloom(step) {
+      const progress = step / 10; // 0.0 -> 1.0
+      targetTint.setHex(ROSE_TINTS[Math.min(step, ROSE_TINTS.length - 1)]);
+
+      bloomPetals.forEach((bp) => {
+        if (step >= bp.orderStep) {
+          // Cánh hoa đã được đánh thức: vươn dài ra và mở dần độ nghiêng theo tầng
+          const localOpen = Math.min(1, (step - bp.orderStep + 1) / (10 - bp.orderStep + 1.5));
+          const bloomFactor = Math.min(1, progress * 0.85 + localOpen * 0.35);
+          bp.targetScale = 0.85 + progress * 0.22;
+          bp.targetRotX = bp.closedX + (bp.openX - bp.closedX) * bloomFactor;
+        } else {
+          bp.targetScale = 0.001;
+          bp.targetRotX = bp.closedX;
+        }
+      });
+
+      stemLeaves.forEach((lf) => {
+        lf.userData.targetScale = lf.userData.baseScale * (0.55 + progress * 0.5);
+      });
+    }
+    update3DFlowerBloom(0);
+
+    // --- NHÓM 2: THẺ BÀI TAROT DIORAMA 3D HOLOGRAM (HIỆN Ở MÀN HÌNH KẾT QUẢ) ---
+    const cardGroup = new THREE.Group();
+    cardGroup.visible = false;
+    cardGroup.position.set(0, 0.22, 0);
+    scene.add(cardGroup);
+
+    // Mặt nền họa tiết Tarot Hoàng Gia (Sunburst, Vòm Trăng & Bảng Tên Vàng Kim)
+    const bgCard = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.48, 3.58),
+      new THREE.MeshBasicMaterial({ color: 0xffffff })
+    );
+    bgCard.position.z = -0.10;
+    cardGroup.add(bgCard);
+
+    // Mặt lưng thẻ mạ vàng hồng
+    const backCard = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.48, 3.58),
+      new THREE.MeshStandardMaterial({ color: 0x2b0c3d, roughness: 0.3, metalness: 0.7, side: THREE.BackSide })
+    );
+    backCard.position.z = -0.12;
+    cardGroup.add(backCard);
+
+    // Vòng tinh tú xoay phía sau hoa
+    const magicCircle = new THREE.Mesh(
+      new THREE.RingGeometry(0.84, 0.87, 64),
+      new THREE.MeshBasicMaterial({ color: 0xffefc1, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+    );
+    magicCircle.position.set(0, 0.22, -0.04);
+    cardGroup.add(magicCircle);
+
+    // Lớp Hoa Nghệ Thuật Trung Tâm (Sắc nét, rực rỡ và nổi khối 3D trên nền vòm Tarot)
+    const flowerPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.38, 2.38),
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        depthWrite: false
+      })
+    );
+    flowerPlane.position.set(0, 0.18, 0.04);
+    cardGroup.add(flowerPlane);
+
+    // Lớp họa tiết Khung Tarot Vàng Kim nổi phía trước hoa
+    const tarotFramePlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.44, 3.54),
+      new THREE.MeshBasicMaterial({
+        map: createTarotFrameTexture(),
+        transparent: true,
+        depthWrite: false
+      })
+    );
+    tarotFramePlane.position.z = 0.08;
+    cardGroup.add(tarotFramePlane);
+
+    // Khung Kim Loại 3D Vàng Hồng (Rose Gold Bezel)
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: 0xf5cba7,
+      metalness: 0.9,
+      roughness: 0.18
+    });
+    const bw = 0.065, bd = 0.1, cw = 2.54, ch = 3.64;
+    const topB = new THREE.Mesh(new THREE.BoxGeometry(cw, bw, bd), goldMat); topB.position.y = ch / 2 - bw / 2;
+    const botB = topB.clone(); botB.position.y = -ch / 2 + bw / 2;
+    const leftB = new THREE.Mesh(new THREE.BoxGeometry(bw, ch, bd), goldMat); leftB.position.x = -cw / 2 + bw / 2;
+    const rightB = leftB.clone(); rightB.position.x = cw / 2 - bw / 2;
+    cardGroup.add(topB, botB, leftB, rightB);
+
+    // Mặt kính ánh kim siêu trong (không làm mờ hoa)
+    const holoGlass = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.42, 3.52),
+      new THREE.MeshBasicMaterial({
+        color: 0xffefc1,
+        transparent: true,
+        opacity: 0.02,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
+    );
+    holoGlass.position.z = 0.1;
+    cardGroup.add(holoGlass);
+
+    // =========================================================================
+    // 5. ĐIỀU KHIỂN LUỒNG TRÒ CHƠI, LÁ BÀI TAROT 2x2 & ĐÓA HOA NỞ DẦN
+    // =========================================================================
+    let userName = "Bạn";
+    let currentQ = 0;
+    let isTransitioning = false;
+    const traits = { E: 0, F: 0, M: 0, S: 0 };
+    const ROMAN_NUMS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+    const BLOOM_MESSAGES = [
+      "🌱 Búp nụ hồng lụa vừa thức giấc...",
+      "🌿 Nhành hoa non đang vươn mình đón sáng...",
+      "🌷 Những tầng cánh đầu tiên đang hé mở...",
+      "🌸 Hương thơm dịu dàng bắt đầu lan tỏa...",
+      "✨ Cánh hoa tầng giữa đang bung nở rực rỡ...",
+      "💫 Sắc hoa đang hòa quyện cùng khí chất của bạn...",
+      "🌺 Đóa hoa đã nở được hơn nửa hành trình...",
+      "👑 Vẻ đẹp kiêu sa đang dần hoàn thiện...",
+      "🌟 Chạm lá bài cuối để đóa hoa bung nở trọn vẹn!",
+      "💖 Tuyệt tác hoa của riêng bạn đã sẵn sàng!"
+    ];
+
+    const introScreen = document.getElementById('intro-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const quizTopStage = document.getElementById('quiz-top-stage');
+    const optContainer = document.getElementById('q-options');
+    const constellationBar = document.getElementById('constellation-bar');
+
+    // Khởi tạo 10 ngôi sao trên thanh Constellation
+    for (let i = 0; i < QUESTIONS.length; i++) {
+      const node = document.createElement('div');
+      node.className = 'star-node';
+      constellationBar.appendChild(node);
+    }
+
+    document.getElementById('start-btn').onclick = () => {
+      const val = document.getElementById('user-name').value.trim();
+      userName = val ? val : "Nàng Thơ";
+      introScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      seedGroup.position.set(0, 0.25, 0);
+      currentQ = 0;
+      traits.E = 0; traits.F = 0; traits.M = 0; traits.S = 0;
+      update3DFlowerBloom(1);
+      renderQuestion();
+    };
+
+    function renderQuestion() {
+      const qData = QUESTIONS[currentQ];
+      const cleanQuestionText = qData.q.replace(/^\d+\.\s*/, '');
+
+      document.getElementById('progress-label').innerText = `✦ Lá Bài Tâm Thức ${ROMAN_NUMS[currentQ]} / X ✦`;
+      document.getElementById('q-title').innerText = cleanQuestionText;
+      document.getElementById('bloom-status-pill').innerText = `${BLOOM_MESSAGES[currentQ]} (${ (currentQ + 1) * 10 }%)`;
+
+      // Cập nhật 10 điểm sao tinh tú
+      const nodes = constellationBar.querySelectorAll('.star-node');
+      nodes.forEach((n, idx) => {
+        n.className = 'star-node' + (idx < currentQ ? ' done' : (idx === currentQ ? ' active' : ''));
+      });
+
+      // Giữ ánh sáng hồng-trắng tôn màu lụa của cánh hoa và mở thêm tầng cánh
+      update3DFlowerBloom(currentQ + 1);
+
+      // Tạo 4 Lá Bài Tarot trong lưới 2x2 với Icon Vector Vàng Kim
+      optContainer.innerHTML = '';
+      qData.opts.forEach((opt, idx) => {
+        const svgIcon = TAROT_SVG_ICONS[opt.icon] || TAROT_SVG_ICONS.stars;
+
+        const cardBtn = document.createElement('button');
+        cardBtn.className = 'tarot-option-card';
+        cardBtn.innerHTML = `
+          <div class="tarot-roman">ARCANUM ${ROMAN_NUMS[idx]}</div>
+          <div class="tarot-icon-orb">${svgIcon}</div>
+          <div class="tarot-opt-text">${opt.text}</div>
+        `;
+
+        cardBtn.onclick = () => {
+          if (isTransitioning) return;
+          isTransitioning = true;
+          cardBtn.classList.add('selected-flip');
+
+          for (const k in opt.traits) traits[k] += opt.traits[k];
+          currentQ++;
+
+          // Xoay nhẹ bông hoa 3D hưởng ứng mỗi lần chọn lá bài
+          seedGroup.rotation.y += 0.75;
+
+          if (currentQ < QUESTIONS.length) {
+            update3DFlowerBloom(currentQ + 1);
+            setTimeout(() => {
+              quizTopStage.classList.add('switching');
+              optContainer.classList.add('switching');
+              setTimeout(() => {
+                renderQuestion();
+                quizTopStage.classList.remove('switching');
+                optContainer.classList.remove('switching');
+                isTransitioning = false;
+              }, 240);
+            }, 260);
+          } else {
+            update3DFlowerBloom(10);
+            setTimeout(() => {
+              isTransitioning = false;
+              showFinalResult();
+            }, 480);
+          }
+        };
+        optContainer.appendChild(cardBtn);
+      });
+    }
+
+    function computeFlowerKey() {
+      const { E, F, M, S } = traits;
+      if (Math.abs(E) <= 1 && Math.abs(F) <= 1 && Math.abs(M) <= 1 && Math.abs(S) <= 1) return "SSR-1";
+      if (E <= -6 && M <= -5) return "SSR-2";
+      return [E >= 0 ? "E" : "I", F >= 0 ? "F" : "T", M >= 0 ? "M" : "C", S >= 0 ? "S" : "B"].join("-");
+    }
+
+    function displayFlowerCard(key) {
+      const f = FLOWERS_DB[key];
+      document.getElementById('res-rarity').innerText = f.rarity;
+      document.getElementById('res-flower-name').innerText = f.name.toUpperCase();
+      document.getElementById('res-flower-title').innerText = `Khí chất: ${f.title} • ${f.latin}`;
+      document.getElementById('res-desc').innerText = f.desc;
+      document.getElementById('res-wish').innerText = `"${f.wish.replace('{name}', userName)}"`;
+
+      // Đổi màu hào quang nền theo loài hoa
+      document.getElementById('orb-1').style.background = f.palette.glow;
+      document.getElementById('orb-2').style.background = f.palette.deep;
+
+      bgCard.material.map = getRichCardBackdropTexture(key);
+      bgCard.material.needsUpdate = true;
+
+      flowerPlane.material.map = getFlowerTexture(key);
+      flowerPlane.material.needsUpdate = true;
+
+      // Hiệu ứng lật thẻ nhẹ khi xuất hiện
+      cardGroup.rotation.y = -0.65;
+    }
+
+    function showFinalResult() {
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+      seedGroup.visible = false;
+      cardGroup.visible = true;
+
+      const finalKey = computeFlowerKey();
+      displayFlowerCard(finalKey);
+    }
+
+    // =========================================================================
+    // 6. TƯƠNG TÁC XOAY THẺ BÀI 3D TRÊN ĐIỆN THOẠI & ANIMATION 60FPS
+    // =========================================================================
+    let targetRotX = 0, targetRotY = 0, isDown = false;
+    function onPointerMove(x, y) {
+      const nx = (x / window.innerWidth) * 2 - 1;
+      const ny = -(y / window.innerHeight) * 2 + 1;
+      targetRotY = nx * 0.48;
+      targetRotX = -ny * 0.28;
+      mainLight.position.x = nx * 4.5;
+      mainLight.position.y = ny * 4.5;
+    }
+    window.addEventListener('pointerdown', e => { isDown = true; onPointerMove(e.clientX, e.clientY); });
+    window.addEventListener('pointermove', e => { if (isDown || e.pointerType === 'mouse') onPointerMove(e.clientX, e.clientY); });
+    window.addEventListener('pointerup', () => { isDown = false; targetRotX = 0; targetRotY = 0; });
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      if (seedGroup.visible) {
+        seedGroup.rotation.y += 0.0065;
+        const baseY = introScreen.classList.contains('hidden') ? 0.25 : 1.25;
+        seedGroup.position.y += ((baseY + Math.sin(t * 2.0) * 0.045) - seedGroup.position.y) * 0.08;
+
+        // Chuyển động hạt đom đóm bay xoắn ốc quanh đóa hoa 3D
+        const dArr = dustGeo.attributes.position.array;
+        for (let i = 0; i < dustCount; i++) {
+          const d = dustData[i];
+          const curA = d.angle + t * d.speed;
+          dArr[i * 3] = Math.cos(curA) * d.radius;
+          dArr[i * 3 + 1] = d.baseY + Math.sin(t * 1.8 + i) * 0.06;
+          dArr[i * 3 + 2] = Math.sin(curA) * d.radius;
+        }
+        dustGeo.attributes.position.needsUpdate = true;
+
+        // Nội suy mượt sắc thái & độ bung mở của 34 cánh hoa hồng lụa 3D
+        petalSilkMat.color.lerp(targetTint, 0.06);
+        bloomPetals.forEach((bp) => {
+          const curS = bp.holder.scale.x;
+          const nextS = curS + (bp.targetScale - curS) * 0.08;
+          bp.holder.scale.setScalar(nextS);
+
+          const breathe = Math.sin(t * 2.0 + bp.phase) * 0.022;
+          bp.holder.rotation.x += ((bp.targetRotX + breathe) - bp.holder.rotation.x) * 0.08;
+        });
+
+        stemLeaves.forEach((lf) => {
+          const cs = lf.scale.x;
+          lf.scale.setScalar(cs + (lf.userData.targetScale - cs) * 0.08);
+        });
+      }
+
+      if (cardGroup.visible) {
+        if (!isDown) {
+          targetRotY = Math.sin(t * 0.95) * 0.16;
+          targetRotX = Math.cos(t * 0.75) * 0.06;
+        }
+        cardGroup.rotation.y += (targetRotY - cardGroup.rotation.y) * 0.08;
+        cardGroup.rotation.x += (targetRotX - cardGroup.rotation.x) * 0.08;
+        flowerPlane.position.y = 0.18 + Math.sin(t * 2.0) * 0.025;
+        magicCircle.rotation.z = t * 0.25;
+      }
+
+      particles.rotation.y = t * 0.035;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
